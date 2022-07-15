@@ -1,6 +1,6 @@
 let manifest = {
     name : "ServiceDesk KeysWork",
-    version : "2.0.2"
+    version : "2.0.3"
 }
 
 window.parent.injectJsApi(window.parent, window);
