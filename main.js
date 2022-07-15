@@ -1,6 +1,6 @@
 let manifest = {
     name : "ServiceDesk KeysWork",
-    version : "2.0.4"
+    version : "2.0.5"
 }
 
 window.parent.injectJsApi(window.parent, window);
@@ -146,7 +146,19 @@ function sendMailName(firstname, initials, domain, reg, page = 0) {
                     if (arrKeys[index].active == true || arrKeys[index].active == 'true') {
                         active = '<span class="removeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1"><path fill="#5fbf00" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"></path></svg></span>'
                     }
-                    let item = '<tr><td>' + arrKeys[index].uuid + '</td><td>' + arrKeys[index].creationDate + '</td><td>' + arrKeys[index].deadline + '</td><td>' + arrKeys[index].type + '</td><td style="text-align: center">' + active + '</td><th scope="row"><a href="https://help.aptekivita.ru/sd/operator/#uuid:' + arrKeys[index].link + '">' + arrKeys[index].username + '</a></th></tr>'
+                    let item = `<tr>
+                                    <td>${arrKeys[index].uuid}</td>
+                                    <td>${arrKeys[index].creationDate}</td>
+                                    <td>${arrKeys[index].deadline}</td>
+                                    <td>${arrKeys[index].type}</td>
+                                    <td style="text-align: center">${active}</td>
+                                    <td scope="row">
+                                        <a href="https://help.aptekivita.ru/sd/operator/#uuid:${arrKeys[index].link}">
+                                            <i class="fa fa-arrow-up-right-from-square"></i>
+                                            ${arrKeys[index].username}
+                                        </a>
+                                    </td>
+                                </tr>`
                     include.push(item)
                 }
                 Result(include)
