@@ -1,6 +1,6 @@
 let manifest = {
     name : "ServiceDesk KeysWork",
-    version : "2.0.0"
+    version : "2.0.1"
 }
 
 window.parent.injectJsApi(window.parent, window);
@@ -199,7 +199,7 @@ $( ".btnSearchMail" ).click(function() {
     getDataKey()
 });
 
-$( ".btnSearchKey" ).click(function() {
+$( ".btnSearchKey" ).click( async function() {
     if (jsApi.getCurrentUser().admin) {
         let keyValue = $('.keyValue').val()
         console.log('Отправляю ключ')
