@@ -1,6 +1,6 @@
 let manifest = {
     name : "ServiceDesk KeysWork",
-    version : "2.0.1"
+    version : "2.0.2"
 }
 
 window.parent.injectJsApi(window.parent, window);
@@ -208,10 +208,11 @@ $( ".btnSearchKey" ).click( async function() {
 
         if ( keyData ) {
 
+            let stateButton = null
             if (keyData.active == true || keyData.active == 'true') {
-                let stateButton = '<span class="removeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1"><path fill="#5fbf00" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"></path></svg></span>'
+                stateButton = '<span class="removeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1"><path fill="#5fbf00" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"></path></svg></span>'
             } else {
-                let stateButton = '<span class="activeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1">  <path transform="rotate(180 12 12)" stroke="null" fill="#ff4040" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"/></svg></span>'
+                stateButton = '<span class="activeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1">  <path transform="rotate(180 12 12)" stroke="null" fill="#ff4040" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"/></svg></span>'
             }
 
             Result( `<tr>
