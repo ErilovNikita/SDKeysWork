@@ -142,20 +142,26 @@ function sendMailName(firstname, initials, domain, reg, page = 0) {
                 }
 
                 for (index = 0; index < arrKeys.length; index++) {
+
                     let active = '<span class="activeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1">  <path transform="rotate(180 12 12)" stroke="null" fill="#ff4040" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"/></svg></span>'
                     if (arrKeys[index].active == true || arrKeys[index].active == 'true') {
                         active = '<span class="removeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1"><path fill="#5fbf00" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"></path></svg></span>'
                     }
+
+                    let typeText = 'Одноразовый'
+                    if ( arrKeys[index].type == 'REUSABLE' ) {
+                        typeText = 'Многоразовый'
+                    }
+
                     let item = `<tr>
                                     <td>${arrKeys[index].uuid}</td>
                                     <td>${arrKeys[index].creationDate}</td>
                                     <td>${arrKeys[index].deadline}</td>
-                                    <td>${arrKeys[index].type}</td>
+                                    <td>${typeText}</td>
                                     <td style="text-align: center">${active}</td>
                                     <td scope="row">
                                         <a href="https://help.aptekivita.ru/sd/operator/#uuid:${arrKeys[index].link}">
-                                            <i class="fa fa-arrow-up-right-from-square"></i>
-                                            ${arrKeys[index].username}
+                                            <i class="fa fa-arrow-up-right-from-square"></i> ${arrKeys[index].username}
                                         </a>
                                     </td>
                                 </tr>`
@@ -172,7 +178,6 @@ async function key2info(keyValue) {
         return JSON.parse(value)
     })
 }
-
 function addAccessKey(firstname, initials, domain, reg, days) {
     jsApi.restCall("exec/?func=modules.keysWork.addAccessKey&params='" + firstname + "','" + initials + "','" + domain + "','" + reg + "','" + days + "'").then((value) => {
         console.log('Получили: ' + value)
@@ -217,11 +222,23 @@ function getDataKey(activePage = 0) {
     }
 }
 
+// Методы для обработки нажатия Enter в полях
+$("#mailValue").keyup(function(event) {
+    if (event.keyCode === 13) {
+        $(".btnSearchMail").click();
+    }
+});
+$("#keyValue").keyup(function(event) {
+    if (event.keyCode === 13) {
+        $(".btnSearchKey").click();
+    }
+});
+
+// Методы кнопок поиска
 $( ".btnSearchMail" ).click(function() {
     $('.keyValue')[0].value = ''
     getDataKey()
 });
-
 $( ".btnSearchKey" ).click( async function() {
 
     $('.mailValue')[0].value = ''
@@ -258,6 +275,7 @@ $( ".btnSearchKey" ).click( async function() {
     }
 });
 
+// Методы по созданию нового ключа
 $( ".btnKeyDays" ).click(function() {
     if (jsApi.getCurrentUser().admin) {
 
