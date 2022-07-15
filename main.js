@@ -1,5 +1,15 @@
+let manifest = {
+    name : "ServiceDesk KeysWork",
+    version : "2.0.0"
+}
+
 window.parent.injectJsApi(window.parent, window);
 let deg
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementsByClassName('app-name')[0].innerHTML = manifest.name
+    document.getElementsByClassName('app-version')[0].innerHTML = "v" + manifest.version
+});
 
 function notResult() {
     console.log('Результата нету');
@@ -134,6 +144,13 @@ function sendMailName(firstname, initials, domain, reg, page = 0) {
         }
     })
 }
+async function key2info(keyValue) {
+    return jsApi.restCall("exec/?func=modules.keysWork.key2info&params='" + keyValue + "'").then((value) => {
+        console.log('Получили: ' + value)
+        return JSON.parse(value)
+    })
+}
+
 function addAccessKey(firstname, initials, domain, reg, days) {
     jsApi.restCall("exec/?func=modules.keysWork.addAccessKey&params='" + firstname + "','" + initials + "','" + domain + "','" + reg + "','" + days + "'").then((value) => {
         console.log('Получили: ' + value)
@@ -186,22 +203,29 @@ $( ".btnSearchKey" ).click(function() {
     if (jsApi.getCurrentUser().admin) {
         let keyValue = $('.keyValue').val()
         console.log('Отправляю ключ')
-        jsApi.restCall("exec/?func=modules.keysWork.key2info&params='" + keyValue + "'").then((value) => {
-            console.log('Получили: ' + value)
-            if ( value == '[]' || value == [] ) {
-                notResult()
-            } else {
-                let keyData = JSON.parse(value)
-                console.log(keyData)
 
-                let active = 'Нет'
-                if (keyData.active == true || keyData.active == 'true') {
-                    active = 'Да'
-                }
-                Result( '<tr><td>' + keyData.uuid + '</td><td>' + keyData.creationDate + '</td><td>' + keyData.deadline + '</td><td>' + keyData.type + '</td><td>' + active + '</td><th scope="row"><a href="https://help.aptekivita.ru/sd/operator/#uuid:' + keyData.link + '" target="_blank">' + keyData.username + '</a></th></tr>' )
-            
+        let dataFromKey = await key2info(keyValue)
+
+        if ( dataFromKey ) {
+
+            if (keyData.active == true || keyData.active == 'true') {
+                let stateButton = '<span class="removeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1"><path fill="#5fbf00" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"></path></svg></span>'
+            } else {
+                let stateButton = '<span class="activeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1">  <path transform="rotate(180 12 12)" stroke="null" fill="#ff4040" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"/></svg></span>'
             }
-        })
+
+            Result( `<tr>
+                        <td>${keyData.uuid}</td>
+                        <td>${keyData.creationDate}</td>
+                        <td>${keyData.deadline}</td>
+                        <td>${keyData.type}</td>
+                        <td>${stateButton}</td>
+                        <th scope="row">
+                            <a href="https://help.aptekivita.ru/sd/operator/#uuid:${keyData.link}" target="_blank">${keyData.username}</a>
+                        </th>
+                    </tr>` )
+        }
+
     } else {
         security()
     }
