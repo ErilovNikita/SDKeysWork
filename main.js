@@ -1,6 +1,6 @@
 let manifest = {
     name : "ServiceDesk KeysWork",
-    version : "2.0.3"
+    version : "2.0.4"
 }
 
 window.parent.injectJsApi(window.parent, window);
@@ -55,7 +55,12 @@ function Result(data) {
         if (jsApi.getCurrentUser().admin) {
             let UUID = this.parentNode.parentNode.getElementsByTagName('td')[0].innerText
             jsApi.restCall("exec/?func=modules.keysWork.removeAccessKey&params='" + UUID + "'").then((value) => {
-                $('.btnSearchMail').trigger('click');
+                if ( $('.mailValue')[0].value != '') {
+                    $('.btnSearchMail').trigger('click');
+                } 
+                if ($('.keyValue')[0].value != '') {
+                    $('.btnSearchKey').trigger('click');
+                }
             })
         } else {
             security()
@@ -66,7 +71,12 @@ function Result(data) {
         if (jsApi.getCurrentUser().admin) {
             let UUID = this.parentNode.parentNode.getElementsByTagName('td')[0].innerText
             jsApi.restCall("exec/?func=modules.keysWork.activateAccessKey&params='" + UUID + "'").then((value) => {
-                $('.btnSearchMail').trigger('click');
+                if ( $('.mailValue')[0].value != '') {
+                    $('.btnSearchMail').trigger('click');
+                } 
+                if ($('.keyValue')[0].value != '') {
+                    $('.btnSearchKey').trigger('click');
+                }
             })
         } else {
             security()
@@ -196,10 +206,14 @@ function getDataKey(activePage = 0) {
 }
 
 $( ".btnSearchMail" ).click(function() {
+    $('.keyValue')[0].value = ''
     getDataKey()
 });
 
 $( ".btnSearchKey" ).click( async function() {
+
+    $('.mailValue')[0].value = ''
+
     if (jsApi.getCurrentUser().admin) {
         let keyValue = $('.keyValue').val()
         console.log('Отправляю ключ')
