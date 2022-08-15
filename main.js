@@ -1,6 +1,6 @@
 let manifest = {
     name : "ServiceDesk KeysWork",
-    version : "2.0.5"
+    version : "2.1.1"
 }
 
 window.parent.injectJsApi(window.parent, window);
@@ -11,6 +11,36 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementsByClassName('app-version')[0].innerHTML = "v" + manifest.version
 });
 
+function getDataTime(datacode) {
+
+    let today = new Date()
+    let todayDay = String(today.getDate())
+    let todayMonth = String(today.getMonth() + 1).padStart(2, '0')
+    let todayYear = today.getFullYear()
+
+    let inData = new Date( Date.parse(datacode) )
+    let inDataDay = String(inData.getDate()).padStart(2, '0')
+    let inDataMonth = String(inData.getMonth() + 1).padStart(2, '0')
+    let inDataYear = inData.getFullYear()
+    let inDataHours = String(inData.getHours()).padStart(2, '0')
+    let inDataMinutes = String(inData.getMinutes()).padStart(2, '0')
+    let inDataStr = `${inDataDay}.${inDataMonth}.${inDataYear} ${inDataHours}:${inDataMinutes}`
+
+    if (inDataYear === todayYear && inDataMonth === todayMonth) {
+        if (inDataDay === todayDay) {
+            return `Сегодня в ${inDataHours}:${inDataMinutes}`
+        }
+        if (parseInt(inDataDay) === ( parseInt(todayDay) - 1) ) {
+            return `Вчера в ${inDataHours}:${inDataMinutes}`
+        }
+        if (parseInt(inDataDay) === ( parseInt(todayDay) + 1) ) {
+            return `Завтра в ${inDataHours}:${inDataMinutes}`
+        }
+    }
+
+    return inDataStr
+
+}
 function notResult() {
     console.log('Результата нету');
     if ( $('.start').attr('Class').indexOf('d-none') == -1 ) {
@@ -125,7 +155,6 @@ function sendMailName(firstname, initials, domain, reg, page = 0) {
             if ( arrKeys.length == 0 ) {
                 notResult()
             } else {
-                //console.log( arrKeys )
                 let include = []
 
                 let pageCount = Math.ceil(arrKeys.length/100)
@@ -143,6 +172,7 @@ function sendMailName(firstname, initials, domain, reg, page = 0) {
 
                 for (index = 0; index < arrKeys.length; index++) {
 
+
                     let active = '<span class="activeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1">  <path transform="rotate(180 12 12)" stroke="null" fill="#ff4040" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"/></svg></span>'
                     if (arrKeys[index].active == true || arrKeys[index].active == 'true') {
                         active = '<span class="removeKey"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" version="1.1"><path fill="#5fbf00" id="svg_1" d="m17,7l-10,0a5,5 0 0 0 -5,5a5,5 0 0 0 5,5l10,0a5,5 0 0 0 5,-5a5,5 0 0 0 -5,-5m0,8a3,3 0 0 1 -3,-3a3,3 0 0 1 3,-3a3,3 0 0 1 3,3a3,3 0 0 1 -3,3z"></path></svg></span>'
@@ -155,8 +185,8 @@ function sendMailName(firstname, initials, domain, reg, page = 0) {
 
                     let item = `<tr>
                                     <td>${arrKeys[index].uuid}</td>
-                                    <td>${arrKeys[index].creationDate}</td>
-                                    <td>${arrKeys[index].deadline}</td>
+                                    <td>${getDataTime(arrKeys[index].creationDate)}</td>
+                                    <td>${getDataTime(arrKeys[index].deadline)}</td>
                                     <td>${typeText}</td>
                                     <td style="text-align: center">${active}</td>
                                     <td scope="row">
@@ -260,8 +290,8 @@ $( ".btnSearchKey" ).click( async function() {
 
             Result( `<tr>
                         <td>${keyData.uuid}</td>
-                        <td>${keyData.creationDate}</td>
-                        <td>${keyData.deadline}</td>
+                        <td>${getDataTime(keyData.creationDate)}</td>
+                        <td>${getDataTime(keyData.deadline)}</td>
                         <td>${keyData.type}</td>
                         <td>${stateButton}</td>
                         <th scope="row">
