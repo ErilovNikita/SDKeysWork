@@ -7,7 +7,7 @@ let manifest = {
     "DEV_MODE" : false,
     "GITHUB_OWNER" : "ErilovNikita",
     "GITHUB_REPO" : "SDKeysWork",
-    "VERSION" : '4.0.0'
+    "VERSION" : '4.1.1'
 }
 
 class main {
