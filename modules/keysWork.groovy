@@ -16,7 +16,7 @@ String find(
     String pageNumber = '1'
 ) {  
     // Приводим все к нижнему регистру
-    value = value.toLowwerCase()
+    value = value.toLowerCase()
     // Парсим текущую страницу
   	Integer currentPage = pageNumber.toInteger()
     // Создаем переменную для хранения результата
