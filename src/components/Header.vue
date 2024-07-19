@@ -24,17 +24,17 @@
 </script>
 
 <template>
-    <div class="bg-dark">
+    <div class="bg-primary">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-6 d-none d-md-block">
                     <nav class="navbar navbar-expand-lg navbar-light  p-md-4 p-2">
                         <div class="navbar-brand text-white" @click="baseStore.setView('start')">
                             <h3 class="app-name">{{main.manifest.NAME}}</h3>
                         </div>
                     </nav>
                 </div>
-                <div class="col-md-6 mb-1">
+                <div class="col-md-6 mb-1 mt-sm-2 mt-md-0">
                     <div class="general p-md-4 p-2">
                         <form class="d-flex mb-2" @submit.prevent="find()">
                             <input class="form-control me-2 findValue" type="search" placeholder="🔎 Поиск по логину или ключу">
@@ -53,5 +53,8 @@
 <style scoped>
     .navbar-brand {
         cursor: pointer;
+    }
+    .bg-primary{
+        background-color: rgb(38, 87, 145) !important
     }
 </style>

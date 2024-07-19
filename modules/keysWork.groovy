@@ -1,7 +1,7 @@
 /* 
  * Автор: Erilov.NA
  * Дата создания: 12.07.2024
- * Версия: 4.0.0
+ * Версия: 4.0.1
  */
 
 import groovy.json.JsonBuilder
@@ -15,6 +15,8 @@ String find(
     String value,
     String pageNumber = '1'
 ) {  
+    // Приводим все к нижнему регистру
+    value = value.toLowwerCase()
     // Парсим текущую страницу
   	Integer currentPage = pageNumber.toInteger()
     // Создаем переменную для хранения результата
