@@ -39,5 +39,5 @@ const manifest = {
 ```
 
 ## Скриншоты
-![Главная станица](doc/image/homepage.png) 
-![Отображение найденных ключей](doc/image/search.png)
+![Главная станица c темной темой](doc/image/darkHomepage.png) 
+![лавная станица c темной по умолчанию](doc/image/defaultHomepage.png)
