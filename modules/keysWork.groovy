@@ -1,7 +1,7 @@
 /* 
  * Автор: Erilov.NA
  * Дата создания: 12.07.2024
- * Версия: 4.0.1
+ * Версия: 4.1.1
  */
 
 import groovy.json.JsonBuilder
@@ -86,11 +86,12 @@ String find(
  * @param login - Строковое значение логина сотрудника
  * @param days - Целое число время жизни ключа в днях
  */
-void addAccessKey(
+String addAccessKey(
     String login, 
     String days
 ) {
-    api.auth.getAccessKey(login).setDeadlineDays(days.toInteger())
+    Object createdKey = api.auth.getAccessKey(login).setDeadlineDays(days.toInteger())
+  	return createdKey.getUuid()
 }
 
 /*
@@ -111,4 +112,24 @@ void activateAccessKey(
     String uuid
 ) {
 	api.auth.activateAccessKey(uuid)
+}
+
+/*
+ * Метод для получения кода темы из юзера
+ * @param login - Логин пользователя
+ */
+String getThemeByUser( String login ) {
+  	Object user = utils.findFirst('employee', ['login' : login])
+  	Object superUser = utils.findFirst("superUser", ["login" : login])
+  
+  	if ( user ) {
+        Object personalSettings = api.employee.getPersonalSettings(user?.UUID)
+        return personalSettings.getThemeOperator()
+    }
+  	if ( superUser ) {
+      	Object personalSettings = api.employee.getPersonalSettings('superUser$' + login)
+        return personalSettings.getThemeOperator()
+    }
+  
+  	return 'default'
 }

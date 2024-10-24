@@ -1,0 +1,26 @@
+[data-bs-theme=dark] .bg-primary {
+    background-color: #202225 !important;
+}
+
+[data-bs-theme=dark] body, 
+[data-bs-theme=dark] html {
+    background-color: #262626 !important;
+}
+
+[data-bs-theme=dark] .btn-primary, 
+[data-bs-theme=dark] .btn-success {
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #202225;
+}
+
+[data-bs-theme=dark] .btn-primary:hover, 
+[data-bs-theme=dark] .btn-success:hover {
+    background-color: #262626 !important;
+    border-color: #ffffff !important;
+    color: #ffffff;
+}
+
+#app {
+    overflow-y: scroll;
+}

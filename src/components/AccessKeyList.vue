@@ -56,7 +56,7 @@
         })
     }
 
-    function copy( str:string ) {
+    function copy( str:string) {
         navigator.clipboard.writeText(str);
     }
 </script>

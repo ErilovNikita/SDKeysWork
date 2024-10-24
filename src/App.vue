@@ -37,8 +37,24 @@
         )
       }
     })
+
+    const currentUser = jsApi.getCurrentUser()
+    main.getThemeCode(currentUser.login).then((code) => {
+      baseStore.setTheme(code)
+      document.getElementsByTagName('html')[0].setAttribute('data-bs-theme', baseStore.theme);
+    })
+
   } catch {
     console.log('Ошибка подключения jsApi')
+
+    main.getData(main.manifest.DEV_TOKEN, 1).then((data) => {
+      let userLogin = data.data[0].username
+      main.getThemeCode(userLogin).then((code) => {
+        baseStore.setTheme(code)
+        document.getElementsByTagName('html')[0].setAttribute('data-bs-theme', baseStore.theme);
+      })
+    })
+
   }
 
   if (!baseStore.dev.enable) {
@@ -55,8 +71,7 @@
       }
     } catch {}
   }
-
-  document.getElementsByTagName('body')[0].style.maxHeight = `${height}px`
+  document.getElementById('app').style.maxHeight = `${height}px`
 </script>
 
 <template>

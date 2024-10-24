@@ -15,7 +15,7 @@
 
         main.addAccessKey(login, keyDays).then((data) => {
             if ( data?.status == 200 ) {
-                message.value = `✅ Ключ успешно создан`
+                message.value = `✅ Ключ успешно создан: ${data?.accessKey}`
                 success.value = true
             } else {
                 message.value = `❌ Пользователь с логином '${login}' в системе не найден`

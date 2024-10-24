@@ -6,6 +6,7 @@ export const useBaseStore = defineStore('responseData', {
           searchValue: '',
           data: {},
           view: 'start',
+          theme: 'default',
           dev: {
             url: '',
             token: '',
@@ -22,6 +23,9 @@ export const useBaseStore = defineStore('responseData', {
         },
         setView(viewName:string = '') {
           this.view = viewName
+        },
+        setTheme(code:string) {
+          this.theme = code
         },
         devMode(enable:boolean, url:string, token:string) {
           this.dev.enable = enable

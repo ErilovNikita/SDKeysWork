@@ -7,7 +7,7 @@ let manifest = {
     "DEV_MODE" : false,
     "GITHUB_OWNER" : "ErilovNikita",
     "GITHUB_REPO" : "SDKeysWork",
-    "VERSION" : '4.1.1'
+    "VERSION" : '4.2.0'
 }
 
 class main {
@@ -29,6 +29,20 @@ class main {
         } else {
             return jsApi.getAppRestBaseUrl() + `/exec/?func=modules.keysWork.${method}&params="${params.join('","')}"`
         }
+    }
+
+    /**
+     * Метод получения кода темы 
+     * @param {string} login - Строковое логина пользователя
+     */
+    static async getThemeCode(
+        login: String,
+    ) {
+        const response = await fetch(main.getRequestUrl('getThemeByUser', [login]), {
+            method: "GET",
+            mode: "cors"
+        })
+        return await response.text()
     }
 
     /**
@@ -70,7 +84,12 @@ class main {
             method: "GET",
             mode: "cors"
         })
-        return response
+        let accessKey = await response.text()
+        let status = response.status
+        return {
+            "status" : status,
+            "accessKey": accessKey
+        }
     }
 
     /**
