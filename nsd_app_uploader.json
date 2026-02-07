@@ -1,0 +1,11 @@
+{
+  "sourceDirPath": "\\dist",
+  "host": "test.ru",
+  "scheme": "https",
+  "accessKey": "",
+  "code": "keysWork",
+  "title": "KeysWork",
+  "minHeight": 600,
+  "turnOff": false,
+  "disableSll": true
+}

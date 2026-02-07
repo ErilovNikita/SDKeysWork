@@ -1,18 +1,17 @@
-import { defineConfig } from 'vite'
+import {defineConfig, loadEnv} from 'vite'
 import vue from '@vitejs/plugin-vue'
+import pkg from './package.json'
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  build: {
-    rollupOptions: {
-      output: {
-        assetFileNames: (assetInfo) => {
-          return `[name]-[hash][extname]`
-        },
-        chunkFileNames: "[name]-[hash].js",
-        entryFileNames: "[name]-[hash].js",
-      },
+export default defineConfig(({mode}) => {
+    const env = loadEnv(mode, "./")
+    return {
+        plugins: [
+            vue()
+        ],
+        base: "./",
+        define: {
+            __APP_VERSION__: JSON.stringify(pkg.version),
+            __APP_NAME__: JSON.stringify(pkg.name)
+        }
     }
-  },
 })
