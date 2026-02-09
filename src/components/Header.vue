@@ -1,60 +1,85 @@
 <script setup lang="ts">
-    import main from "../config"
-    import { useBaseStore } from '../stores'
 
-    const baseStore = useBaseStore()
+import {ref} from "vue";
+import InitialData from "../model/InitialData.ts";
+import {PlusOutlined, DeleteOutlined, UnorderedListOutlined} from '@ant-design/icons-vue';
 
-    function find() {
-        let findValue = document.getElementsByClassName('findValue')[0].value
+interface Props {
+  initData: InitialData
+  initLogin: string | null
+  state : "create" | "list" | "empty" | "permissionError" | 'delete' | 'key'
+}
 
-        if (! document.getElementsByClassName('findValue')[0].value) {
-            baseStore.setView('start')
-        } else {
-            main.getData(findValue, 1).then((data) => {
-                if ( data?.data?.length > 0 ) {
-                    console.log(data)
-                    baseStore.set(data, findValue)
-                    baseStore.setView('list')
-                } else {
-                    baseStore.setView('empty')
-                }
-            })
-        }
-    }
+interface Emits {
+  (e: 'update:mode', mode: string): void
+
+  (e: 'update:uuid', key: string | null): void
+
+  (e: 'update:login', login: string | null): void
+
+  (e: 'search:uuid', uuid: string | null): void
+
+  (e: 'search:login', login: string | null): void
+
+  (e: 'add:accessKey', login: string | null): void
+
+  (e: 'delete:accessKeys', login: string | null): void
+
+}
+
+const emit = defineEmits<Emits>()
+const props = defineProps<Props>()
+
+const login = ref<string | null>(props.initLogin)
+const uuid = ref<string | null>(null)
+const mode = ref<string>(props.initData.superUser ? "login" : "uuid")
+
+
 </script>
 
 <template>
-    <div class="bg-primary">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 d-none d-md-block">
-                    <nav class="navbar navbar-expand-lg navbar-light  p-md-4 p-2">
-                        <div class="navbar-brand text-white" @click="baseStore.setView('start')">
-                            <h3 class="app-name">{{main.manifest.NAME}}</h3>
-                        </div>
-                    </nav>
-                </div>
-                <div class="col-md-6 mb-1 mt-sm-2 mt-md-0">
-                    <div class="general p-md-4 p-2">
-                        <form class="d-flex mb-2" @submit.prevent="find()">
-                            <input class="form-control me-2 findValue" type="search" placeholder="🔎 Поиск по логину или ключу">
-                            <a 
-                                class="btn btn-success btnSearchMail" 
-                                @click="find()"
-                            >Найти</a>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <a-page-header style="border: 1px solid rgb(235, 237, 240)"
+      title="🔑 KeysWork">
+    <template #extra>
+      <a-space v-if="initData.canUse">
+        <a-space direction="horizontal" v-if="initData.superUser">
+          <a-typography style="font-size: 16px">Искать по:</a-typography>
+          <a-radio-group v-model:value="mode" button-style="solid" @change="emit('update:mode', mode)">
+            <a-radio-button value="login">Логину</a-radio-button>
+            <a-radio-button value="uuid">Ключу</a-radio-button>
+          </a-radio-group>
+        </a-space>
+        <a-space v-if="mode == 'login' && initData.superUser" direction="horizontal">
+          <a-input v-model:value="login" placeholder="🔍 Поиск по логину" @change="emit('update:login', login)"/>
+          <a-button type="primary" @click="emit('search:login', login)">Найти</a-button>
+        </a-space>
+        <a-space v-if="mode == 'uuid'" direction="horizontal">
+          <a-input-password v-model:value="uuid" placeholder="🔍 Поиск по ключу" @change="emit('update:uuid', uuid)"/>
+          <a-button type="primary" @click="emit('search:uuid', uuid)">Найти</a-button>
+        </a-space>
+        <a-button type="primary" @click="emit('search:login', login)" :ghost="state == 'list'">
+          Список
+          <template #icon>
+            <UnorderedListOutlined />
+          </template>
+        </a-button>
+        <a-button type="primary" @click="emit('add:accessKey', login)" :ghost="state == 'create'">
+          Создать ключ
+          <template #icon>
+            <PlusOutlined/>
+          </template>
+        </a-button>
+        <a-button type="primary" @click="emit('delete:accessKeys', login)" :ghost="state == 'delete'">
+          Удалить все ключи
+          <template #icon>
+            <DeleteOutlined/>
+          </template>
+        </a-button>
+      </a-space>
+    </template>
+  </a-page-header>
 </template>
 
 <style scoped>
-    .navbar-brand {
-        cursor: pointer;
-    }
-    .bg-primary{
-        background-color: rgb(38, 87, 145) !important
-    }
+
 </style>

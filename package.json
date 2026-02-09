@@ -1,23 +1,27 @@
 {
   "name": "sdkeyswork",
   "private": true,
-  "version": "4.0.0",
+  "version": "5.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --mode development",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "buildAndSend": "vite build && create_zip && send_zip",
+    "create_zip": "create_zip",
+    "send_zip": "send_zip"
   },
   "dependencies": {
-    "bootstrap": "^5.3.3",
-    "bootstrap-vue": "^2.23.1",
-    "pinia": "^2.1.7",
+    "@iframe-resizer/child": "^5.5.8",
+    "ant-design-vue": "^4.2.6",
+    "nsd_js_api_proxy": "^4.18.5-1.4.6",
     "vue": "^3.4.29"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
+    "nsd_app_uploader": "^1.1.0",
     "typescript": "^5.2.2",
-    "vite": "^5.3.1",
+    "vite": "7.1.11",
     "vue-tsc": "^2.0.21"
   }
 }

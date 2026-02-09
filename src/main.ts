@@ -1,11 +1,21 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import {createApp} from 'vue'
 import App from './App.vue'
-import 'bootstrap/dist/css/bootstrap.css'
+import Antd from 'ant-design-vue';
 import '../assets/custom.css';
+import {JsApiProxy} from "nsd_js_api_proxy";
+import devConfig from "./js_api_dev_config.ts";
+import ConnectorService from "./connector.ts";
+import '@iframe-resizer/child'
+import 'ant-design-vue/dist/reset.css';
 
-const pinia = createPinia()
 const app = createApp(App)
+const jsApi: JsApiProxy = JsApiProxy.getInstance(devConfig)
+const devMode = jsApi.isDevMode()
+const connector = new ConnectorService()
 
-app.use(pinia)
+app.use(Antd)
+app.provide("jsApi", jsApi)
+
 app.mount('#app')
+
+export {jsApi, connector, devMode}
