@@ -32,6 +32,24 @@ export default class ConnectorService {
     }
 
     /**
+     * Получить страницу ключей пользователя
+     * @param pageNumber номер страницы
+     * @param pageSize размер страницы
+     */
+    async getAllAccessKeysPage(
+        pageNumber: number | null = 1,
+        pageSize: number | null = 20
+    ): Promise<KeysList> {
+        let initUrl = "exec?params=request,response,user" +
+            "&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getAllAccessKeysPage"
+        if (pageNumber) initUrl += "&pageNumber=" + pageNumber.toString()
+        if (pageSize) initUrl += "&pageSize=" + pageSize.toString()
+
+        const response = await jsApi.restCallAsJson(initUrl, {method: "GET"});
+        return response as KeysList;
+    }
+
+    /**
      * Получить код темы текущего пользователя
      * @param login
      */

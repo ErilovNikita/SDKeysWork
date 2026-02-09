@@ -10,7 +10,6 @@ interface Emits {
   (e: 'update:deleted'): void
 }
 
-
 interface Props {
   accessKey: KeyInfo
 }
@@ -34,7 +33,7 @@ function yes() {
 </script>
 
 <template>
-  <a-modal v-model:visible="showConfirm"
+  <a-modal v-model:open="showConfirm"
            title="Вы уверены?"
            width="400px"
            :footer="null"
@@ -47,7 +46,8 @@ function yes() {
     <div>
       <a-button type="primary"
                 @click="yes"
-                style="margin-right: 8px;">Да
+                style="margin-right: 8px;">
+        Да
       </a-button>
       <a-button @click="showConfirm = false">Нет</a-button>
     </div>

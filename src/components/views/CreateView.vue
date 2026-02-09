@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {h, ref} from 'vue'
+import {h, reactive, ref} from 'vue'
 import {connector} from "../../main.ts";
 import InitialData from "../../model/InitialData.ts";
 import {PlusOutlined, MinusCircleOutlined} from "@ant-design/icons-vue";
@@ -19,22 +19,33 @@ interface Props {
 
 const props = defineProps<Props>()
 const emits = defineEmits<Emits>()
-
+const formRef = ref();
 const loading = ref<boolean>(false)
 const dateFormat = ref<string>('DD.MM.YYYY HH:mm')
 
-const localLogin = ref<string | null>(props.login)
-const deadline = ref<string | null>(null)
-const deadlineMode = ref<"days" | "deadline">("days")
-const keyDays = ref<number | null>(null)
-const description = ref<string | null>(null)
-const onetime = ref<boolean>(false)
+interface Model {
+  login: string | null,
+  deadline: string | null,
+  deadlineMode: "days" | "deadline",
+  keyDays: number | null,
+  description: string | null,
+  onetime: boolean
+}
+
+const model = reactive<Model>({
+  login: props.login,
+  deadline: null,
+  deadlineMode: "days",
+  keyDays: null,
+  description: null,
+  onetime: false
+})
 
 async function createNewToken(): Promise<KeyInfo> {
-  if (deadlineMode.value == 'days') deadline.value = null
-  if (deadlineMode.value == 'deadline') keyDays.value = null
+  if (model.deadlineMode == 'days') model.deadline = null
+  if (model.deadlineMode == 'deadline') model.keyDays = null
   loading.value = true
-  return await connector.addAccessKey(localLogin.value!, keyDays.value, description.value, onetime.value, deadline.value).then((data) => {
+  return await connector.addAccessKey(model.login!, model.keyDays, model.description, model.onetime, model.deadline).then((data) => {
     notification.success({
       message: "Ключ успешно создан",
       btn: () => h(
@@ -64,48 +75,73 @@ async function createNewToken(): Promise<KeyInfo> {
 }
 
 async function ok() {
-  emits("update:created", await createNewToken())
+  const ok = await formRef.value.validate().then(() => {
+    return true
+  }).catch(() => {
+    return false
+  })
+  if (ok) {
+    const token = await createNewToken()
+    emits("update:created", token)
+  }
 }
 
 function cancel() {
   emits("update:cancelled")
 }
 
-
 </script>
 
 <template>
-  <a-form class="main-container">
+  <a-form ref="formRef"
+          :model="model"
+          class="main-container">
     <div class="line" v-if="initData.superUser">
       <a-typography-text class="title" content="Логин пользователя:"/>
-      <a-input class="field" v-model:value="localLogin"/>
+      <a-form-item name="login" :rules="[{ required: true, message: 'Надо' }]">
+        <a-input class="field" v-model:value="model.login"/>
+      </a-form-item>
     </div>
     <div class="line">
       <a-typography-text class="title" content="Время жизни:"/>
-      <a-radio-group class="field" v-model:value="deadlineMode">
-        <a-radio-button class="r-btn" value="days">В днях</a-radio-button>
-        <a-radio-button class="r-btn" value="deadline">Дедлайн</a-radio-button>
-      </a-radio-group>
+      <a-form-item name="deadlineMode">
+        <a-radio-group class="field" v-model:value="model.deadlineMode">
+          <a-radio-button class="r-btn" value="days">В днях</a-radio-button>
+          <a-radio-button class="r-btn" value="deadline">Дедлайн</a-radio-button>
+        </a-radio-group>
+      </a-form-item>
     </div>
-    <div v-if="deadlineMode == 'deadline'" class="line">
+    <div v-if="model.deadlineMode == 'deadline'" class="line">
       <a-typography-text class="title" content="Дедлайн:"/>
-      <a-date-picker class="field" v-model:value="deadline" :format="dateFormat" :value-format="dateFormat"
-                     placeholder=" "/>
+      <a-form-item name="deadline">
+        <a-date-picker class="field"
+                       v-model:value="model.deadline"
+                       :format="dateFormat"
+                       :value-format="dateFormat"
+                       placeholder=" "/>
+      </a-form-item>
     </div>
-    <div v-if="deadlineMode == 'days'" class="line">
+    <div v-if="model.deadlineMode == 'days'" class="line">
       <a-typography-text class="title" content="Срок жизни в днях:"/>
-      <a-input-number class="field" v-model:value="keyDays"/>
+      <a-form-item name="keyDays">
+        <a-input-number class="field" v-model:value="model.keyDays"/>
+      </a-form-item>
     </div>
     <div class="line">
       <a-typography-text class="title" content="Описание:"/>
-      <a-input class="field" v-model:value="description"/>
+      <a-form-item name="description" :rules="[{ required: true, message: 'Надо' }]">
+        <a-input placeholder="Для чего используется ключ" class="field" v-model:value="model.description"/>
+      </a-form-item>
+
     </div>
     <div class="line">
       <a-typography-text class="title" content="Тип:"/>
-      <a-radio-group v-model:value="onetime" class="field">
-        <a-radio-button class="r-btn" :value="false">Многоразовый</a-radio-button>
-        <a-radio-button class="r-btn" :value="true">Одноразовый</a-radio-button>
-      </a-radio-group>
+      <a-form-item name="onetime">
+        <a-radio-group v-model:value="model.onetime" class="field">
+          <a-radio-button class="r-btn" :value="false">Многоразовый</a-radio-button>
+          <a-radio-button class="r-btn" :value="true">Одноразовый</a-radio-button>
+        </a-radio-group>
+      </a-form-item>
     </div>
     <div class="line btn-container">
       <a-button class="final-btn" type="primary" @click="ok" :loading="loading">

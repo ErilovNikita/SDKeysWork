@@ -54,16 +54,21 @@ function handleTableChange(newPagination: Pagination) {
 
 function getPage() {
   loading.value = true
-  if (props.login) connector.getUserAccessKeysPage(props.login, pagination.value.current, pagination.value.pageSize).then((data: KeysList) => {
+  let promise: Promise<KeysList>
+  if (props.login && props.login.trim().length != 0) promise = connector.getUserAccessKeysPage(props.login, pagination.value.current, pagination.value.pageSize)
+  else promise = connector.getAllAccessKeysPage(pagination.value.current, pagination.value.pageSize)
+  promise.then((data: KeysList) => {
+    console.log(data)
     pagination.value.total = data.pages.count
-    elements.value = data.data
+    elements.value.length = 0
+    elements.value.push(...data.data)
     if (elements.value.length == 0) emit("update:empty")
     //throw new Error("тест")
-  }).catch(e => {
+  }).catch((e) => {
     pagination.value.total = 1
     elements.value.length = 0
     notification.error({
-      message: "Ошибочка вышла",
+      message: "Ошибка при загрузке списка",
       description: e.message,
       placement: 'top',
       duration: 5
@@ -129,6 +134,9 @@ defineExpose({
         <a-typography-text :content="record.description"/>
       </template>
     </a-table-column>
+    <a-table-column title="Пользователь"
+                    data-index="username"
+                    key="username"/>
     <a-table-column title="Тип"
                     data-index="type"
                     key="type">
@@ -140,6 +148,9 @@ defineExpose({
     <a-table-column title="Дата создания"
                     data-index="creationDate"
                     key="creationDate"/>
+    <a-table-column title="Дедлайн"
+                    data-index="deadline"
+                    key="deadline"/>
     <a-table-column title="Последнее использование"
                     data-index="lastUsageDate"
                     key="lastUsageDate"/>

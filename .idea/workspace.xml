@@ -5,43 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="efe1a679-7874-449d-b7cb-533a0a8c95a7" name="Changes" comment="переписано на ant vue + ts. добавлены фичи по удалению ключей. увеличено количество выводимой информации.  переписан контроллер.">
-      <change afterPath="$PROJECT_DIR$/src/components/list-columns/AccessKeySpan.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/list-columns/AccessKeySwitch.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/list-columns/DeleteKeyButton.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/list-columns/MostBeautifulJsonEver.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/views/AccessKeyView.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/views/CreateView.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/views/DeleteView.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/views/EmptyView.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/views/ListView.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/views/NoPermissionView.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/connector.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/js_api_dev_config.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/InitialData.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/KeyInfo.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/KeysList.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/model/Pagination.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/vite-env.d.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/assets/custom.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/image/darkHomepage.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/doc/image/defaultHomepage.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/modules/keysWork.groovy" beforeDir="false" afterPath="$PROJECT_DIR$/modules/keysWork.groovy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/AccessKeyList.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/CreateNewAccessKey.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/EmptyView.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Footer.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Footer.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Header.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Header.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/PermissionError.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/StartView.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/stores.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nsd_app_uploader.json" beforeDir="false" afterPath="$PROJECT_DIR$/nsd_app_uploader.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/list-columns/DeleteKeyButton.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/list-columns/DeleteKeyButton.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/views/CreateView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/views/CreateView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/views/ListView.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/views/ListView.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/connector.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/connector.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,9 +57,11 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/ekazantsev/projects/nsd/frontend/SDKeysWork/src/components/list-columns",
+    "last_opened_file_path": "C:/ekazantsev/projects/nsd/frontend/SDKeysWork/src/components/views",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -99,6 +70,7 @@
     "npm.build.executor": "Run",
     "npm.buildAndSend.executor": "Run",
     "npm.dev.executor": "Run",
+    "settings.editor.selected.configurable": "advanced.settings",
     "ts.external.directory.path": "C:\\ekazantsev\\projects\\nsd\\frontend\\SDKeysWork\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   },
@@ -110,9 +82,9 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\ekazantsev\projects\nsd\frontend\SDKeysWork\src\components\views" />
       <recent name="C:\ekazantsev\projects\nsd\frontend\SDKeysWork\src\components\list-columns" />
       <recent name="C:\ekazantsev\projects\nsd\frontend\SDKeysWork\src" />
-      <recent name="C:\ekazantsev\projects\nsd\frontend\SDKeysWork\src\components\views" />
       <recent name="C:\ekazantsev\projects\nsd\frontend\SDKeysWork\src\components" />
       <recent name="C:\ekazantsev\projects\nsd\frontend\SDKeysWork\src\model" />
     </key>
@@ -166,8 +138,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.19416.15" />
-        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-IU-241.19416.15" />
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.30387.90" />
       </set>
     </attachedChunks>
   </component>
@@ -179,11 +151,39 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770298377351</updated>
-      <workItem from="1770298378927" duration="62193000" />
+      <workItem from="1770298378927" duration="64953000" />
+      <workItem from="1770568441113" duration="888000" />
+      <workItem from="1770571411865" duration="210000" />
+      <workItem from="1770575591442" duration="16002000" />
+      <workItem from="1770642151265" duration="2967000" />
     </task>
+    <task id="LOCAL-00001" summary="переписано на ant vue + ts. добавлены фичи по удалению ключей. увеличено количество выводимой информации.  переписан контроллер.">
+      <option name="closed" value="true" />
+      <created>1770433185276</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1770433185276</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="переписано на ant vue + ts. добавлены фичи по удалению ключей. увеличено количество выводимой информации.  переписан контроллер." />
+    <option name="LAST_COMMIT_MESSAGE" value="переписано на ant vue + ts. добавлены фичи по удалению ключей. увеличено количество выводимой информации.  переписан контроллер." />
   </component>
 </project>

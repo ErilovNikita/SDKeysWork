@@ -5,7 +5,7 @@
  * История:
  * nerilov - 12.07.2024 - v4.1.1 - создано
  * ekazantsev - 05.02.2025 - v5 - переписано на web_api_components с добавлением валидации пользователя + добавлены новые методы
- *
+ * ekazantsev - 09.02.2025 - v5.1 - добавлен метод получения всех ключей. исправлены баги пагинации
  *
  * Исходники ВП вы можете найти в репозиторих:
  * https://github.com/ErilovNikita/SDKeysWork/tree/main - основной
@@ -39,8 +39,7 @@ abstract class Parameters {
     static final Boolean ALLOW_TO_ALL_IN_TEST_ENV = false
     /** Продакшн хост */
     static final List<String> TEST_HOSTS = [
-            'sd.test.ru',
-            'sd.staging.ru'
+
     ]
 }
 
@@ -49,6 +48,7 @@ abstract class Dto {
         static class Pages {
             Integer count
             Integer current
+            Integer pageSize
         }
         Pages pages
         List<Map<String, Object>> data = []
@@ -79,6 +79,16 @@ abstract class Utilities {
         String q = "SELECT COUNT(*) FROM ${AccessKey.class.getName()} WHERE username = :login"
         return apiHolder.api.db.query(q).set('login', username).list().last() as Integer
     }
+
+    /**
+     * Получить число всех ключей
+     * @return число
+     */
+    static Integer getAllKeysCount() {
+        String q = "SELECT COUNT(*) FROM ${AccessKey.class.getName()} WHERE username != 'naumen'"
+        return apiHolder.api.db.query(q).list().last() as Integer
+    }
+
 
     /**
      * Получить базовые настройки
@@ -149,6 +159,15 @@ abstract class PermissionsService {
     static void assertUserCanUseApplication(ISDtObject user) {
         if (!canUserUseApplication(user)) throw new WebApiException.Forbidden("Нильзя")
     }
+
+    /**
+     * Проверить что пользователь является суперпользователем
+     * @param user пользователь
+     */
+    static void assertUserIsSuperuser(ISDtObject user) {
+        if (!isSuperuser(user)) punish()
+    }
+
     /**
      * Проверить что ключ принадлежит пользователю
      * @param user пользователь
@@ -225,7 +244,7 @@ abstract class PermissionsService {
 
 /**
  * GET
- * Метод для получения данных ключей по логину или UUID самого ключа
+ * Метод для получения данных ключей пользователя
  * url параметры:
  * value - Строковое значение логина сотрудника или UUID ключа
  * pageNumber - номер страницы
@@ -236,16 +255,50 @@ void getUserAccessKeysPage(HttpServletRequest request, HttpServletResponse respo
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String value = webUtils.getParamElseThrow('value').toLowerCase()
+        PermissionsService.asserUsersLogin(user, value)
         Utilities.getUserOrThrow(value)
         Integer currentPage = webUtils.getParam('pageNumber', Integer).orElse(1)
         Integer pageSize = webUtils.getParam('pageSize', Integer).orElse(20)
-        Dto.KeysList result = new Dto.KeysList(pages: new Dto.KeysList.Pages(count: 1, current: currentPage))
-        PermissionsService.asserUsersLogin(user, value)
-        Integer startIndex = (currentPage - 1) * pageSize
-        Integer endIndex = startIndex + pageSize
-        result.data.addAll(api.auth.getEmployeeAccessKeysInfoByLogin(value, startIndex, endIndex) as Collection<Map<String, Object>>)
-        result.pages.count = Utilities.getUsersKeysCount(value)
-        webUtils.setBodyAsJson(result)
+        Integer offset = (currentPage - 1) * pageSize
+        Integer limit = pageSize
+        webUtils.setBodyAsJson(
+                new Dto.KeysList(
+                        data: api.auth.getEmployeeAccessKeysInfoByLogin(value, offset, limit) as Collection<Map<String, Object>>,
+                        pages: new Dto.KeysList.Pages(
+                                count: Utilities.getUsersKeysCount(value),
+                                current: currentPage,
+                                pageSize: pageSize
+                        )
+                )
+        )
+    }
+}
+
+/**
+ * GET
+ * Метод для получения данных ключей
+ * url параметры:
+ * pageNumber - номер страницы
+ * pageSize - размер страницы
+ */
+@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
+void getAllAccessKeysPage(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
+        PermissionsService.assertUserIsSuperuser(user)
+        Integer currentPage = webUtils.getParam('pageNumber', Integer).orElse(1)
+        Integer pageSize = webUtils.getParam('pageSize', Integer).orElse(20)
+        Integer offset = (currentPage - 1) * pageSize
+        Integer limit = pageSize
+        webUtils.setBodyAsJson(
+                new Dto.KeysList(
+                        data: api.auth.getAllAccessKeysInfo(offset, limit) as Collection<Map<String, Object>>,
+                        pages: new Dto.KeysList.Pages(
+                                count: Utilities.getAllKeysCount(),
+                                current: currentPage,
+                                pageSize: pageSize
+                        ),
+                )
+        )
     }
 }
 
@@ -407,3 +460,23 @@ void getInitData(HttpServletRequest request, HttpServletResponse response, ISDtO
         )
     }
 }
+
+/*
+//TODO на будущее
+@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
+void updateKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
+        PermissionsService.assertUserCanUseApplication(user)
+        String uuid = webUtils.getParamElseThrow('uuid')
+        def dao = api.auth.accessKeyDao
+        def key = dao.get(uuid)
+        String username = key.username
+        PermissionsService.asserUsersLogin(user, username)
+        String description = webUtils.getParam('description').orElse(null)
+        String deadline = webUtils.getParamElseThrow('deadline', Date)
+        key.setDescription(description)
+        key.setDeadline(deadline)
+        dao.update(key)
+    }
+}
+ */
