@@ -15,11 +15,13 @@ pids
 
 # Environment files
 .env
+*.iml
 .env.*[a-k]
 .env.*[m-z]
 
 # Editor directories and files
 .vscode/
+.idea/
 *.sw?
 *.sublime-workspace
 
@@ -61,6 +63,7 @@ jest-output/
 # Lock files (if you switch package managers often, uncomment the relevant lines)
 yarn.lock
 package-lock.json
+nsd_app_uploader.json
 pnpm-lock.yaml
 
 # Lerna
