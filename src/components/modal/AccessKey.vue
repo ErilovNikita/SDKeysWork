@@ -47,6 +47,7 @@ const updateKeyInfo = async () => {
     if (data.uuid) {
       keyInfo.value = data
       notifySuccess()
+      searchStore.reset()
     } else notifyError()
   } catch (e) {
     notifyError()

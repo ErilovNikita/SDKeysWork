@@ -14,7 +14,7 @@ export const useSearchStore = defineStore('search', () => {
     trigger.value++
   }
 
-  const resetApp = () => {
+  const reset = () => {
     mode.value = SearchMode.Login
     data.value = null
   }
@@ -26,6 +26,6 @@ export const useSearchStore = defineStore('search', () => {
 
     setSearchMode,
     setSearchData,
-    resetApp
+    reset
   }
 })

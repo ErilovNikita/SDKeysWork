@@ -46,8 +46,7 @@ const getPage = (type:'all'|'user' = 'all') =>  {
   promise.then((data: IKeysList) => {
     pagination.value.total = data.pages.count
     elements.value.length = 0
-    elements.value.push(...data.data)
-    
+    elements.value.push(...data.data)    
     if (type == 'user') {
       notification.success({
         message: "Запрос выполнен",
@@ -55,7 +54,7 @@ const getPage = (type:'all'|'user' = 'all') =>  {
         placement: 'bottomRight',
         duration: 5
       })
-    }
+    } else searchStore.reset()
   }).catch((e:any) => {
     notification.error({
       message: "Ошибка при загрузке списка",
@@ -63,6 +62,7 @@ const getPage = (type:'all'|'user' = 'all') =>  {
       placement: 'bottomRight',
       duration: 5
     })
+    searchStore.reset()
   }).finally(() => loading.value = false)
 }
 const getUrl = (uuid: string) => `${jsApi.getAppBaseUrl()}operator/#uuid:${uuid}`
