@@ -1,86 +1,73 @@
 <script setup lang="ts">
+import themeConfig from './themeProvider'
+import { ref } from 'vue'
+
+import {useSearchStore} from './stores/search.ts'
+import {useUserStore} from './stores/user.ts'
+import type {IUser} from './utils/types.ts'
+import {SearchMode} from './utils/types.ts'
+import ConnectorService from './utils/connector.ts'
+import {isDev} from './utils/connector.ts'
+
 import Header from './components/Header.vue'
-import Footer from './components/Footer.vue'
-import CreateView from './components/views/CreateView.vue'
-import EmptyView from './components/views/EmptyView.vue'
-import NoPermissionView from './components/views/NoPermissionView.vue'
-import ListView from './components/views/ListView.vue'
-import DeleteView from "./components/views/DeleteView.vue";
-import {connector, jsApi} from "./main.ts";
-import {ref} from "vue";
-import InitialData from "./model/InitialData.ts";
-import {notification} from "ant-design-vue";
-import AccessKeyView from "./components/views/AccessKeyView.vue";
+import KeysList from './components/KeysList.vue'
+import MessageTemplateView from './components/views/MessageTemplateView.vue'
 
-const initialData = ref<InitialData | null>(null)
-const currentUser = ref<string | null>(null)
-const state = ref<"create" | "list" | "empty" | "permissionError" | 'delete' | 'key'>("list")
-const login = ref<string | null>(currentUser.value)
-const uuid = ref<string | null>(null)
-const initializationDone = ref<boolean>(false)
+import StatesModal from './components/development/StatesModal.vue'
+import CreateKeyModal from './components/modal/CreateKey.vue'
+import DeleteKeysModal from "./components/modal/DeleteKeys.vue"
+import AccessKeyModal from "./components/modal/AccessKey.vue"
+import SearchModal from "./components/modal/Search.vue"
 
-const list = ref()
+const searchStore = useSearchStore()
+const UserStore = useUserStore()
 
-connector.getInitialData().then(data => {
-  //data.superUser = false
-  //data.canUse = false
-  initialData.value = data
-}).then(() => {
-  //throw new Error("ТЕСТ")
-  if (!initialData.value!.canUse) state.value = 'permissionError'
-  login.value = jsApi.getCurrentUser().login
-  currentUser.value = login.value
-  initializationDone.value = true
-}).catch(e => {
-  notification.error({
-    message: "Ошибочка при инициализации",
-    placement: 'top',
-    duration: 5
-  })
-  state.value = 'permissionError'
-  throw e
-})
+const KeysListRef = ref<InstanceType<typeof KeysList> | null>(null)
+const createKeyModalRef = ref<InstanceType<typeof CreateKeyModal> | null>(null)
+const deleteKeysModalRef = ref<InstanceType<typeof DeleteKeysModal> | null>(null)
+const KeyInfoModalRef = ref<InstanceType<typeof AccessKeyModal> | null>(null)
+const SearchModalRef = ref<InstanceType<typeof SearchModal> | null>(null)
 
-function handleSearchUserEmit() {
-  state.value = 'list'
-  list.value.extSearch()
+new ConnectorService().getUserData().then( (data:IUser) => UserStore.setUser(data))
+
+const handleCreateKeyModalShow = ():any => createKeyModalRef.value?.controller.show()
+const handleDeleteKeysModalShow = ():any => deleteKeysModalRef.value?.controller.show()
+const handleKeyInfoModalShow = ():any => KeyInfoModalRef.value?.controller.show()
+const handleSearchModalShow = ():any => SearchModalRef.value?.controller.show()
+const handleResetSearch = ():any => KeysListRef.value?.getPage('all')
+const handleSearch = async (value: string):Promise<any> => {
+  searchStore.setSearchData(value)
+  
+  if (searchStore.mode === SearchMode.UUID) {
+    if (!KeyInfoModalRef.value) return
+    const result = await KeyInfoModalRef.value.waitForResult()
+    if (result === 'success') handleKeyInfoModalShow()
+  }
 }
-
 </script>
 
 <template>
-  <div v-if="initializationDone">
-    <Header :init-login="login"
-            :init-data="initialData!"
-            :state="state"
-            @update:login="a => login = a"
-            @search:login="handleSearchUserEmit"
-            @update:uuid="a => uuid = a"
-            @search:uuid="state = 'key'"
-            @add:accessKey="state = 'create'"
-            @delete:accessKeys="state = 'delete'"/>
-    <CreateView v-if="state == 'create'"
-                :login="login"
-                :init-data="initialData!"
-                @update:cancelled="() => state = 'list'"
-                @update:created="() => state = 'list'"/>
-    <DeleteView v-if="state == 'delete'"
-                :init-data="initialData!"
-                :login="login"
-                @update:cancelled="() => state = 'list'"
-                @update:deleted="() => state = 'list'"/>
-    <ListView ref="list"
-              v-if="state == 'list'"
-              :init-data="initialData!"
-              @update:empty="state = 'empty'"
-              :login="login"/>
-    <EmptyView v-if="state == 'empty'"
-               @update:add="() => state = 'create'"/>
-    <NoPermissionView v-if="state == 'permissionError'"/>
-    <AccessKeyView v-if="state == 'key'"
-                   :uuid="uuid"
-                   @update:ok="() => state = 'list'"
-                   :init-data="initialData!"/>
-    <Footer/>
-  </div>
+  <a-config-provider :theme="themeConfig">
+    <StatesModal v-if="isDev()"/>
+    <CreateKeyModal ref="createKeyModalRef"/>
+    <DeleteKeysModal ref="deleteKeysModalRef"/>
+    <AccessKeyModal ref="KeyInfoModalRef"/>
+    <SearchModal ref="SearchModalRef" @search="handleSearch" />
+
+    <Header 
+      @showModal:CreateKey="handleCreateKeyModalShow"
+      @showModal:DeleteAllKeys="handleDeleteKeysModalShow"
+      @showModal:Search="handleSearchModalShow"
+      @search:Reset="handleResetSearch"
+    />
+
+    <KeysList ref="KeysListRef" />
+
+    <MessageTemplateView 
+      v-if="!UserStore.canUse"
+      emoji="✨"
+      header="Ваших прав не достаточно"
+      description="Но вы можете посмотреть как тут красиво"
+    />
+  </a-config-provider>
 </template>

@@ -1,21 +1,42 @@
 import {createApp} from 'vue'
+import {initializeJsApi, InitVariable} from '@nsmp/js-api'
+import { createPinia } from 'pinia'
 import App from './App.vue'
-import Antd from 'ant-design-vue';
-import '../assets/custom.css';
-import {JsApiProxy} from "nsd_js_api_proxy";
-import devConfig from "./js_api_dev_config.ts";
-import ConnectorService from "./connector.ts";
+import Antd from 'ant-design-vue'
 import '@iframe-resizer/child'
-import 'ant-design-vue/dist/reset.css';
+import hljs from 'highlight.js/lib/core'
+import json from 'highlight.js/lib/languages/json'
+import hljsVuePlugin from "@highlightjs/vue-plugin"
 
-const app = createApp(App)
-const jsApi: JsApiProxy = JsApiProxy.getInstance(devConfig)
-const devMode = jsApi.isDevMode()
-const connector = new ConnectorService()
+import 'highlight.js/styles/lightfair.css'
+import './assets/styles/antCustomStyles.css'
+import './assets/styles/main.css'
 
-app.use(Antd)
-app.provide("jsApi", jsApi)
+const env = new InitVariable(
+	import.meta.env.MODE,
+	import.meta.env.VITE_ACCESS_KEY,
+	import.meta.env.VITE_APP_URL,
+	import.meta.env.VITE_APP_CODE,
+	import.meta.env.VITE_REST_PATH,
+	import.meta.env.VITE_SUBJECT_UUID,
+	import.meta.env.VITE_USER_LOGIN,
+	import.meta.env.VITE_USER_UUID,
+    import.meta.env.VITE_USER_ADMIN,
+    import.meta.env.VITE_USER_LICENSED
+)
 
-app.mount('#app')
+hljs.registerLanguage('json', json)
 
-export {jsApi, connector, devMode}
+initializeJsApi( {}, env ).then((declorateJsApi: any) => {
+    const app = createApp(App)
+	const pinia = createPinia()
+
+	app.provide("jsApi", declorateJsApi)
+	app.use(Antd)
+	app.use(pinia)
+	app.use(hljsVuePlugin)
+	app.mount('#app')
+}) 
+.catch((e:string) => {
+    console.error(e)
+})

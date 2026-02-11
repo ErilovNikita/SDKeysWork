@@ -1,85 +1,113 @@
 <script setup lang="ts">
+import PlusIcon from '../assets/icons/plus.svg'
+import DeleteIcon from '../assets/icons/delete.svg'
+import SearchIcon from '../assets/icons/zoomIn.svg'
+import CloseIcon from '../assets/icons/exitOfState.svg'
 
-import {ref} from "vue";
-import InitialData from "../model/InitialData.ts";
-import {PlusOutlined, DeleteOutlined, UnorderedListOutlined} from '@ant-design/icons-vue';
+import { useUserStore } from '../stores/user'
+import { useSearchStore } from '../stores/search'
+import { AlertFiledObject } from '../utils/fileds'
+import { compareVersions, getLastVersion } from '../utils/services'
 
-interface Props {
-  initData: InitialData
-  initLogin: string | null
-  state : "create" | "list" | "empty" | "permissionError" | 'delete' | 'key'
-}
+const emit = defineEmits<{
+  (e: 'showModal:CreateKey'): void
+  (e: 'showModal:DeleteAllKeys'): void
+  (e: 'showModal:Search'): void
+  (e: 'search:Reset'): void
+}>()
 
-interface Emits {
-  (e: 'update:mode', mode: string): void
+const searchStore = useSearchStore()
+const user = useUserStore()
+const versionController = new AlertFiledObject(false, 'info', true)
 
-  (e: 'update:uuid', key: string | null): void
-
-  (e: 'update:login', login: string | null): void
-
-  (e: 'search:uuid', uuid: string | null): void
-
-  (e: 'search:login', login: string | null): void
-
-  (e: 'add:accessKey', login: string | null): void
-
-  (e: 'delete:accessKeys', login: string | null): void
-
-}
-
-const emit = defineEmits<Emits>()
-const props = defineProps<Props>()
-
-const login = ref<string | null>(props.initLogin)
-const uuid = ref<string | null>(null)
-const mode = ref<string>(props.initData.superUser ? "login" : "uuid")
-
-
+getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
+    switch(compareVersions(__APP_VERSION__, remoteVersion)) {
+        case 1:
+            versionController.setType('warning')
+            versionController.setMessage(`Вы используете тестовую версию ${__APP_VERSION__}! Свяжитесь с поддержкой для исправления.`)
+            console.warn(`Последний релиз в репозитории: ${remoteVersion} < ${__APP_VERSION__}`)
+            break
+        case -1:
+            versionController.setType('error')
+            versionController.setMessage(`Ваша версия ${__APP_VERSION__} устарела! Сбросьте кеш браузера, чтобы получить новую версию.`)
+            console.warn(`Последний релиз в репозитории: ${remoteVersion} > ${__APP_VERSION__}`)
+            break
+        case 0:
+            versionController.setType('success')
+            versionController.setMessage(`Используется актуальная версия ${__APP_VERSION__}`)
+            break
+    }
+}) .catch(e => {
+    versionController.setType('error')
+    versionController.setMessage((e as Error).message + ". Свяжитесь с поддержкой для исправления.") 
+})
 </script>
 
 <template>
-  <a-page-header style="border: 1px solid rgb(235, 237, 240)"
-      title="🔑 KeysWork">
-    <template #extra>
-      <a-space v-if="initData.canUse">
-        <a-space direction="horizontal" v-if="initData.superUser">
-          <a-typography style="font-size: 16px">Искать по:</a-typography>
-          <a-radio-group v-model:value="mode" button-style="solid" @change="emit('update:mode', mode)">
-            <a-radio-button value="login">Логину</a-radio-button>
-            <a-radio-button value="uuid">Ключу</a-radio-button>
-          </a-radio-group>
+  <a-row class="header">
+    <a-col :span="16">
+      <a-space v-if="user?.canUse">
+        <a-space :size="1">
+          <a-button 
+            type="primary" 
+            class="cardButton" 
+            @click="emit('showModal:Search')"
+          >
+            <SearchIcon />Поиск
+          </a-button>
+
+          <a-button 
+            v-if="searchStore.data"
+            type="primary" 
+            class="cardButton" 
+            @click="emit('search:Reset')"
+          >
+            <CloseIcon />Сбросить поиск
+          </a-button>
+
         </a-space>
-        <a-space v-if="mode == 'login' && initData.superUser" direction="horizontal">
-          <a-input v-model:value="login" placeholder="🔍 Поиск по логину" @change="emit('update:login', login)"/>
-          <a-button type="primary" @click="emit('search:login', login)">Найти</a-button>
-        </a-space>
-        <a-space v-if="mode == 'uuid'" direction="horizontal">
-          <a-input-password v-model:value="uuid" placeholder="🔍 Поиск по ключу" @change="emit('update:uuid', uuid)"/>
-          <a-button type="primary" @click="emit('search:uuid', uuid)">Найти</a-button>
-        </a-space>
-        <a-button type="primary" @click="emit('search:login', login)" :ghost="state == 'list'">
-          Список
-          <template #icon>
-            <UnorderedListOutlined />
-          </template>
+
+        <a-button 
+          type="primary" 
+          class="cardButton" 
+          @click="emit('showModal:CreateKey')"
+        >
+          <PlusIcon />Создать ключ
         </a-button>
-        <a-button type="primary" @click="emit('add:accessKey', login)" :ghost="state == 'create'">
-          Создать ключ
-          <template #icon>
-            <PlusOutlined/>
-          </template>
+
+        <a-button 
+          type="primary" 
+          class="cardButton" 
+          @click="emit('showModal:DeleteAllKeys')"
+        >
+          <DeleteIcon />Удалить все ключи
         </a-button>
-        <a-button type="primary" @click="emit('delete:accessKeys', login)" :ghost="state == 'delete'">
-          Удалить все ключи
-          <template #icon>
-            <DeleteOutlined/>
-          </template>
-        </a-button>
+
       </a-space>
-    </template>
-  </a-page-header>
+    </a-col>
+    <a-col :span="8">
+      <a-flex justify="end">
+        <a-alert 
+            v-if="versionController.visiable.value" 
+            :type="versionController.type.value" 
+            :closable="versionController.closable.value"
+            :show-icon="versionController.showIcon.value" 
+            @close="versionController.hidden()"
+        >
+            <template #message>
+                {{ versionController.message.value }}
+            </template>
+        </a-alert>
+      </a-flex>
+    </a-col>
+  </a-row>
 </template>
 
 <style scoped>
-
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0px;
+}
 </style>

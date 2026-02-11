@@ -1,56 +1,47 @@
 <script setup lang="ts">
+import { ref } from "vue"
+import { IKeyInfo } from "../../utils/types"
 
-import KeyInfo from "../../model/KeyInfo.ts";
-import {h, ref} from "vue";
-import {CopyOutlined} from '@ant-design/icons-vue';
-
-interface Props {
-  accessKey: KeyInfo
-}
-
-const props = defineProps<Props>()
+const props = defineProps<{ accessKey: IKeyInfo }>()
+const showText = ref(false)
 const tooltipTitle = ref<string>("Скопировать")
 
-
-function copy() {
+const copy = () => {
   navigator.clipboard.writeText(props.accessKey.uuid)
-  tooltipTitle.value = 'Скопировано!';
-
-  // Автоматически скрываем уведомление через 2 секунды
-  setTimeout(() => {
-    tooltipTitle.value = 'Скопировать'
-  }, 2000)
+  tooltipTitle.value = "Скопировано!"
+  setTimeout(() => (tooltipTitle.value = "Скопировать"), 2000)
 }
-
-const showText = ref(false);
-
+const handleClick = () => {
+  copy()
+  showText.value = true
+}
 </script>
 
 <template>
   <a-space direction="horizontal">
-    <a-tooltip :title="tooltipTitle">
-      <a-button type="text"
-                class="btn1"
-                shape="circle"
-                @click="copy"
-                :icon="h(CopyOutlined)"/>
+    <a-tooltip :title="tooltipTitle" class="uuid-text" :trigger="['hover']" placement="top">
+      <a-skeleton-button 
+        :active="true" 
+        shape="round" 
+        class="key-skeleton"
+        v-if="!showText"
+        @click="handleClick"
+      />
     </a-tooltip>
-    <a-button shape="round">
-      <a-typography-text v-if="showText"
-                         :content="accessKey.uuid"
-                         @click="showText = !showText"/>
-      <a-typography-text v-if="!showText"
-                         :content="accessKey.uuid.replace(/[^-]/g, '*')"
-                         @click="showText = !showText"/>
-    </a-button>
 
+      <a-typography-text 
+        v-if="showText"
+        class="uuid-text"
+        :content="accessKey.uuid"
+        @click="showText = false"
+      />
   </a-space>
 </template>
 
 <style scoped>
-.btn1 {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.uuid-text {
+  font-family: monospace;
+  cursor: pointer;
+  user-select: all;
 }
 </style>

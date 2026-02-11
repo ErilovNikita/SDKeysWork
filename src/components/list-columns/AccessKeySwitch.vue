@@ -1,43 +1,57 @@
 <script setup lang="ts">
+import {notification} from "ant-design-vue"
 
-import KeyInfo from "../../model/KeyInfo.ts";
-import {connector} from "../../main.ts";
-import {reactive} from "vue";
-import {notification} from "ant-design-vue";
+import { IKeyInfo } from "../../utils/types"
+import ConnectorService from "../../utils/connector"
 
-interface Props {
-  accessKey: KeyInfo
-}
+import PrivacyIcon from '../../assets/icons/privacy.svg'
 
-const props = defineProps<Props>()
-const localAccessKey = reactive<KeyInfo>(props.accessKey)
-const catchE = (e: Error) => {
+const props = defineProps<{accessKey: IKeyInfo}>()
+const api:ConnectorService = new ConnectorService()
+const usingEnvAccessKey:string | null = import.meta.env.VITE_ACCESS_KEY
+
+const errorSwitch = (e: any):void => {
   notification.error({
-    message: "Ошибочка при переключении: ",
-    description : e.message,
-    placement: 'top',
+    message: "Произошла ошибка",
+    description : JSON.parse(e).cause.message,
+    placement: 'bottomRight',
     duration: 5
   })
 }
 
-function toggle() {
-  if (localAccessKey.active) connector.enableKey(localAccessKey.uuid).catch(catchE)
-  else connector.disableKey(localAccessKey.uuid).catch(catchE)
+const successSwitch = (description:string):any => {
+  notification.success({
+    message: "Ключ успешно изменен",
+    description: description,
+    placement: 'bottomRight',
+    duration: 5
+  })
+}
+
+const toggle = ():void => {
+  if (props.accessKey.active) api.enableKey(props.accessKey.uuid)
+    .then(successSwitch("Ключ доступа активирован"))
+    .catch(errorSwitch)
+  else api.disableKey(props.accessKey.uuid)
+    .then(successSwitch("Ключ доступа отключен"))
+    .catch(errorSwitch)
 }
 
 </script>
 
 <template>
-  <a-space direction="horizontal">
     <div class="switch">
-      <a-switch v-model:checked="localAccessKey.active" @click='toggle' size="small"/>
+      <a-switch v-model:checked="props.accessKey.active" @click='toggle' size="small" v-if="props.accessKey.uuid != usingEnvAccessKey"/>
+      <PrivacyIcon v-if="props.accessKey.uuid == usingEnvAccessKey"/>
     </div>
-  </a-space>
 </template>
 
 <style scoped>
 .switch {
-  display: flex;
-  align-items: center;
+  text-align: center;
+}
+.switch svg {
+  transform: scale(1.4);
+  margin-bottom: -3px;
 }
 </style>
