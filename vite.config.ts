@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
             svgLoader(),
             zipPack({
                 outDir: 'dist',
-                outFileName: `${env.VITE_APP_CODE}-${process.env.npm_package_version}.zip`
+                outFileName: `${env.VITE_APP_CODE}-release-v${process.env.npm_package_version}.zip`
             })
         ],
         base: "./",
