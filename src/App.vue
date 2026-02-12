@@ -11,7 +11,7 @@ import {isDev} from './utils/connector.ts'
 
 import Header from './components/Header.vue'
 import KeysList from './components/KeysList.vue'
-import MessageTemplateView from './components/views/MessageTemplateView.vue'
+import MessageTemplate from './components/views/MessageTemplate.vue'
 
 import StatesModal from './components/development/StatesModal.vue'
 import CreateKeyModal from './components/modal/CreateKey.vue'
@@ -63,7 +63,7 @@ const handleSearch = async (value: string):Promise<any> => {
 
     <KeysList ref="KeysListRef" />
 
-    <MessageTemplateView 
+    <MessageTemplate 
       v-if="!UserStore.canUse"
       emoji="✨"
       header="Ваших прав не достаточно"
