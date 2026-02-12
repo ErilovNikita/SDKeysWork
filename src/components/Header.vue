@@ -120,7 +120,6 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0 0 0;
 }
 .filter .line {
   background-color: #f4f4f4;

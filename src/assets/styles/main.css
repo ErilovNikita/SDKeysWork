@@ -1,3 +1,11 @@
+body {
+    margin: 0 !important;
+}
+.ant-modal-root .ant-modal-mask {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(2px);
+}
 .site-collapse-custom-collapse .ant-collapse-header {
     padding: 10px 10px !important;
     fill: #fff !important;
