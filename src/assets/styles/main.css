@@ -34,8 +34,9 @@
     width: 290px !important;
 }
 
-a {
+a, .icon-link {
     color: rgb(8, 88, 150) !important;
+    fill: rgb(8, 88, 150) !important;
 }
 
 a:hover {

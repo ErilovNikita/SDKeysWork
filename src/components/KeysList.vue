@@ -83,8 +83,7 @@ watch(() => searchStore.trigger, () => {
     <a-table-column title="Пользователь" data-index="username" key="username" :custom-header-cell="() => ({ style: { minWidth: '240px' } })">
       <template #customRender="{ record }">
         <a-typography-link :href="getUrl(record.employeeUuid)" target="_blank">
-          <LinkIcon class="icon icon-link"/>
-          {{record.username}}
+          <LinkIcon class="icon icon-link"/>{{record.username}}
         </a-typography-link>
       </template>
     </a-table-column>
@@ -156,7 +155,5 @@ watch(() => searchStore.trigger, () => {
 <style scoped>
 .date-tag { transform: scale(1.15); }
 .icon.icon-link { margin-bottom: -3px; }
-.svg {
-  margin-bottom: -10px !important;
-}
+.svg { margin-bottom: -10px !important; }
 </style>
