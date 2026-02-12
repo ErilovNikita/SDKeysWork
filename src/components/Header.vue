@@ -45,7 +45,7 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
 
 <template>
   <a-row class="header">
-    <a-col :span="16">
+    <a-col :span="12">
       <a-space v-if="user?.canUse">
         <a-space :size="1">
           <a-button 
@@ -76,7 +76,7 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
 
       </a-space>
     </a-col>
-    <a-col :span="8">
+    <a-col :span="12">
       <a-flex justify="end">
         <a-alert 
             v-if="versionController.visiable.value" 
