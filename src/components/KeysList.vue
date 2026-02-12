@@ -153,7 +153,7 @@ watch(() => searchStore.trigger, () => {
 </template>
 
 <style scoped>
-.date-tag { transform: scale(1.15); }
+.date-tag { font-size: 11px !important; }
 .icon.icon-link { margin-bottom: -3px; }
 .svg { margin-bottom: -10px !important; }
 </style>
