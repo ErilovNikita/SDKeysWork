@@ -1,18 +1,35 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import pkg from './package.json'
+import svgLoader from 'vite-svg-loader'
+import zipPack from "vite-plugin-zip-pack"
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  build: {
-    rollupOptions: {
-      output: {
-        assetFileNames: (assetInfo) => {
-          return `[name]-[hash][extname]`
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, process.cwd())
+    
+    return {
+        plugins: [
+            vue(),
+            svgLoader(),
+            zipPack({
+                outDir: 'dist',
+                outFileName: `${env.VITE_APP_CODE}-${process.env.npm_package_version}.zip`
+            })
+        ],
+        base: "./",
+        define: {
+            __APP_VERSION__: JSON.stringify(pkg.version),
+            __APP_NAME__: JSON.stringify(pkg.name)
         },
-        chunkFileNames: "[name]-[hash].js",
-        entryFileNames: "[name]-[hash].js",
-      },
+        server: {
+            proxy: {
+                "/sd/": {
+                    target: env.VITE_APP_REAL_URL,
+                    changeOrigin: true,
+                    secure: false,
+                    ws: true
+                }
+            }
+        }
     }
-  },
 })

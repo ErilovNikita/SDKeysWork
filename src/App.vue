@@ -1,85 +1,73 @@
 <script setup lang="ts">
-  import main from './config'
-  import { useBaseStore } from './stores'
+import themeConfig from './themeProvider'
+import { ref } from 'vue'
 
-  import Header from './components/Header.vue'
-  import Footer from './components/Footer.vue'
-  import CreateNewAccessKey from './components/CreateNewAccessKey.vue'
-  import EmptyView from './components/EmptyView.vue'
-  import StartView from './components/StartView.vue'
-  import PermissionError from './components/PermissionError.vue'
-  import AccessKeyList from './components/AccessKeyList.vue'
+import {useSearchStore} from './stores/search.ts'
+import {useUserStore} from './stores/user.ts'
+import type {IUser} from './utils/types.ts'
+import {SearchMode} from './utils/types.ts'
+import ConnectorService from './utils/connector.ts'
+import {isDev} from './utils/connector.ts'
 
-  const baseStore = useBaseStore()
+import Header from './components/Header.vue'
+import KeysList from './components/KeysList.vue'
+import MessageTemplate from './components/views/MessageTemplate.vue'
 
-  // Пишем в консоль бейдж приложения
-  console.log(`%c${main.manifest.NAME} App \n%cby ${main.manifest.GITHUB_OWNER}`, 'background: #d9a5f9; color: #A020F0', 'background: #fff; color: #333')
+import StatesModal from './components/development/StatesModal.vue'
+import CreateKeyModal from './components/modal/CreateKey.vue'
+import DeleteKeysModal from "./components/modal/DeleteKeys.vue"
+import AccessKeyModal from "./components/modal/AccessKey.vue"
+import SearchModal from "./components/modal/Search.vue"
 
-  // Устанавливаем высоту приложения 
-  let height = 800
+const searchStore = useSearchStore()
+const UserStore = useUserStore()
 
-  baseStore.devMode(
-    main.manifest.DEV_MODE,
-    main.manifest.DEV_URL,
-    main.manifest.DEV_TOKEN
-  )
+const KeysListRef = ref<InstanceType<typeof KeysList> | null>(null)
+const createKeyModalRef = ref<InstanceType<typeof CreateKeyModal> | null>(null)
+const deleteKeysModalRef = ref<InstanceType<typeof DeleteKeysModal> | null>(null)
+const KeyInfoModalRef = ref<InstanceType<typeof AccessKeyModal> | null>(null)
+const SearchModalRef = ref<InstanceType<typeof SearchModal> | null>(null)
 
-  try {
-    // Подключаем jsApi
-    window.parent.injectJsApi(window.parent, window)
-    // Прокидываем переменные из параметров контента
-    jsApi.contents.getParameters().then((params) =>{
-      if ( params.dev == true && baseStore.dev.enable  ) {
-        baseStore.devMode(
-          params.dev,
-          params.instanceUrl,
-          params.token
-        )
-      }
-    })
+new ConnectorService().getUserData().then( (data:IUser) => UserStore.setUser(data))
 
-    const currentUser = jsApi.getCurrentUser()
-    main.getThemeCode(currentUser.login).then((code) => {
-      baseStore.setTheme(code)
-      document.getElementsByTagName('html')[0].setAttribute('data-bs-theme', baseStore.theme);
-    })
-
-  } catch {
-    console.log('Ошибка подключения jsApi')
-
-    main.getData(main.manifest.DEV_TOKEN, 1).then((data) => {
-      let userLogin = data.data[0].username
-      main.getThemeCode(userLogin).then((code) => {
-        baseStore.setTheme(code)
-        document.getElementsByTagName('html')[0].setAttribute('data-bs-theme', baseStore.theme);
-      })
-    })
-
+const handleCreateKeyModalShow = ():any => createKeyModalRef.value?.controller.show()
+const handleDeleteKeysModalShow = ():any => deleteKeysModalRef.value?.controller.show()
+const handleKeyInfoModalShow = ():any => KeyInfoModalRef.value?.controller.show()
+const handleSearchModalShow = ():any => SearchModalRef.value?.controller.show()
+const handleResetSearch = ():any => KeysListRef.value?.getPage('all')
+const handleSearch = async (value: string):Promise<any> => {
+  searchStore.setSearchData(value)
+  
+  if (searchStore.mode === SearchMode.UUID) {
+    if (!KeyInfoModalRef.value) return
+    const result = await KeyInfoModalRef.value.waitForResult()
+    if (result === 'success') handleKeyInfoModalShow()
   }
-
-  if (!baseStore.dev.enable) {
-    // Проверяем высоту приложения
-    try {
-      // Отсутствует в старых версиях
-      height = jsApi.contents.getInitialHeight()
-    } catch {}
-
-    try {
-      // Если нет прав, отрисовываем ошибку
-      if (!jsApi.getCurrentUser().admin) {
-        baseStore.setView('error')
-      }
-    } catch {}
-  }
-  document.getElementById('app').style.maxHeight = `${height}px`
+}
 </script>
 
 <template>
-  <Header class="mb-4"/>
-  <CreateNewAccessKey v-if="baseStore.view == 'new'"/>
-  <AccessKeyList v-if="baseStore.view == 'list'"/> 
-  <EmptyView v-if="baseStore.view == 'empty'"/>
-  <StartView v-if="baseStore.view == 'start'"/>
-  <PermissionError v-if="baseStore.view == 'error'"/>
-  <Footer />
+  <a-config-provider :theme="themeConfig">
+    <StatesModal v-if="isDev()"/>
+    <CreateKeyModal ref="createKeyModalRef"/>
+    <DeleteKeysModal ref="deleteKeysModalRef"/>
+    <AccessKeyModal ref="KeyInfoModalRef"/>
+    <SearchModal ref="SearchModalRef" @search="handleSearch" />
+
+    <Header 
+      @showModal:CreateKey="handleCreateKeyModalShow"
+      @showModal:DeleteAllKeys="handleDeleteKeysModalShow"
+      @showModal:Search="handleSearchModalShow"
+      @search:Reset="handleResetSearch"
+    />
+
+    <KeysList ref="KeysListRef" />
+
+    <MessageTemplate 
+      v-if="!UserStore.canUse"
+      emoji="✨"
+      header="Ваших прав не достаточно"
+      description="Но вы можете посмотреть как тут красиво"
+    />
+  </a-config-provider>
 </template>

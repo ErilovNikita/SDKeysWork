@@ -1,25 +1,129 @@
 # Logs
-logs
-*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-*zip
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment files
+.env
+*.iml
+.env.*[a-k]
+.env.*[m-z]
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+.vscode/
+.idea/
 *.sw?
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Dependency directories
+node_modules/
+.pnp/
+.pnp.js
+
+# Build directories
+dist/
+build/
+out/
+
+# Vite cache
+.vite/
+.vite-cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+.nyc_output/
+jest-cache/
+jest-output/
+
+# Temp files
+*.temp
+*.tmp
+*.bak
+*.log
+*.log.*
+
+# Lock files (if you switch package managers often, uncomment the relevant lines)
+yarn.lock
+package-lock.json
+nsd_app_uploader.json
+pnpm-lock.yaml
+
+# Lerna
+lerna-debug.log
+
+# Parcel
+.cache/
+
+# Svelte
+.svelte-kit/
+
+# Firebase
+.firebase/
+
+# VS Code testing snapshots
+*.code-workspace*
+
+# Storybook files
+.storybook/
+
+# Vue CLI Service
+.vuepress/
+.vue/
+
+# Local tool configurations
+.local/
+
+# Mac files
+*.DS_Store
+._*
+
+# ESlint cache
+.eslintcache
+
+# Prettier cache
+.prettier-cache
+
+# Tailwind
+tailwind.config.js
+tailwind.config.ts
+
+# Stylelint cache
+.stylelintcache
+
+# Translation files
+*.pot
+*.po
+*.mo
+
+# Miscellaneous
+*.gz
+*.gzip
+*.zip
+*.tar
+*.tgz
+*.7z
+*.rar
+*.tar.gz
+*.apk
+*.deb
+*.rpm
+*.iso
+*.img
