@@ -8,6 +8,7 @@ import { useUserStore } from '../stores/user'
 import { useSearchStore } from '../stores/search'
 import { AlertFiledObject } from '../utils/fileds'
 import { compareVersions, getLastVersion } from '../utils/services'
+import { SearchMode } from '../utils/types'
 
 const emit = defineEmits<{
   (e: 'showModal:CreateKey'): void
@@ -56,15 +57,6 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
             <SearchIcon />Поиск
           </a-button>
 
-          <a-button 
-            v-if="searchStore.data"
-            type="primary" 
-            class="cardButton" 
-            @click="emit('search:Reset')"
-          >
-            <CloseIcon />Сбросить поиск
-          </a-button>
-
         </a-space>
 
         <a-button 
@@ -101,6 +93,27 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
       </a-flex>
     </a-col>
   </a-row>
+
+  <a-row class="filter" v-if="searchStore.data">
+    <a-col :span="24" class="line">
+      <a-typography-link 
+        type="text" 
+        @click="emit('showModal:Search')"
+      >
+        Изменить
+      </a-typography-link>
+
+      <a-typography-link 
+        v-if="searchStore.data"
+        type="text" 
+        @click="emit('search:Reset')"
+      >
+        Сбросить
+      </a-typography-link>
+
+      <a-typography-text>[{{ searchStore.mode == SearchMode.Login ? "Пользователь" : "Ключ" }}: {{ searchStore.data }}]</a-typography-text>
+    </a-col>
+  </a-row>
 </template>
 
 <style scoped>
@@ -108,6 +121,18 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0px;
+  padding: 10px 0 0 0;
+}
+.filter .line {
+  background-color: #f4f4f4;
+  padding: 2px 10px !important;
+  margin-bottom: 10px;
+}
+.filter .line > span,
+.filter .line > a {
+  font-size: 12px !important;
+}
+.filter .line > a {
+  margin-right: 8px;
 }
 </style>
