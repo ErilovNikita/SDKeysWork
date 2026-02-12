@@ -54,7 +54,7 @@ const yes = () => {
 
   <a-button 
     type="text"
-    class="btn1"
+    class="icon"
     shape="circle"
     @click="controller.show()"
     :icon="h(DeleteIcon)"

@@ -4,7 +4,7 @@ import {notification} from "ant-design-vue"
 import { IKeyInfo } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
 
-import PrivacyIcon from '../../assets/icons/privacy.svg'
+import ClockIcon from '../../assets/icons/clock.svg'
 
 const props = defineProps<{accessKey: IKeyInfo}>()
 const api:ConnectorService = new ConnectorService()
@@ -42,7 +42,7 @@ const toggle = ():void => {
 <template>
     <div class="switch">
       <a-switch v-model:checked="props.accessKey.active" @click='toggle' size="small" v-if="props.accessKey.uuid != usingEnvAccessKey"/>
-      <PrivacyIcon v-if="props.accessKey.uuid == usingEnvAccessKey"/>
+      <ClockIcon style="opacity: .5;" v-if="props.accessKey.uuid == usingEnvAccessKey"/>
     </div>
 </template>
 

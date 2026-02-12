@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue"
+import { h, onMounted, ref, watch } from "vue"
 import { notification } from 'ant-design-vue'
 
 import AccessKeySpan from "./list-columns/AccessKeySpan.vue"
@@ -7,6 +7,7 @@ import AccessKeySwitch from "./list-columns/AccessKeySwitch.vue"
 import DeleteKey from "./list-columns/DeleteKeyButton.vue"
 
 import LinkIcon from '../assets/icons/link.svg'
+import PrivacyIcon from '../assets/icons/privacy.svg'
 
 import { SearchMode, IKeyInfo, IKeysList, IPagination } from "../utils/types"
 import { formatSmartDate, criticalDeadline } from "../utils/services"
@@ -134,7 +135,12 @@ watch(() => searchStore.trigger, () => {
           <template #content>
             <highlightjs style="margin-top: 0px;" language='json' :code="JSON.stringify(record, null, 4)" />
           </template>
-          <a-button type="link" style="margin: 0; padding: 0;">JSON</a-button>
+          <a-button 
+            type="text"
+            class="icon"
+            shape="circle"
+            :icon="h(PrivacyIcon)"
+          />
         </a-popover>
       </template>
     </a-table-column>
@@ -148,10 +154,9 @@ watch(() => searchStore.trigger, () => {
 </template>
 
 <style scoped>
-.date-tag {
-  transform: scale(1.15);
-}
-.icon.icon-link {
-  margin-bottom: -3px;
+.date-tag { transform: scale(1.15); }
+.icon.icon-link { margin-bottom: -3px; }
+.svg {
+  margin-bottom: -10px !important;
 }
 </style>
