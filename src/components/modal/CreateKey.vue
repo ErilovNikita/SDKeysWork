@@ -7,9 +7,10 @@ import Modal from '../../components/naumen/Modal.vue'
 import type { ICreateKeyForm } from "../../utils/types.ts"
 import ConnectorService from '../../utils/connector.ts'
 import { useUserStore } from '../../stores/user.ts'
-import { ModalController } from '../../utils/fileds.ts'
+import { AlertFiledObject, ModalController } from '../../utils/fileds.ts'
 
 const controller = new ModalController("Создать ключ")
+const descriptionAlertController = new AlertFiledObject(false, 'info', true, "Для чего используется ключ").show()
 const user = useUserStore()
 const api: ConnectorService = new ConnectorService()
 const formRef = ref()
@@ -95,7 +96,17 @@ const ok = async ():Promise<void> => {
         </a-form-item>
 
         <a-form-item name="description" :rules="[{ required: true, message: 'Надо' }]" label="Описание">
-          <a-input placeholder="Для чего используется ключ" class="field" v-model:value="model.description" />
+          <a-alert 
+            v-if="descriptionAlertController.visiable.value" 
+            :type="descriptionAlertController.type.value" 
+            :closable="descriptionAlertController.closable.value"
+            :show-icon="descriptionAlertController.showIcon.value" 
+        >
+            <template #message>
+                {{ descriptionAlertController.message.value }}
+            </template>
+        </a-alert>
+          <a-input placeholder="" class="field" v-model:value="model.description" />
         </a-form-item>
 
         <a-form-item name="onetime" label="Тип">

@@ -31,14 +31,12 @@ defineExpose({ controller })
             <a-form ref="formRef" :model="model" layout="vertical">
                 <a-form-item :rules="[{ required: true, message: 'Обязательно к заполнению' }]" label="Тип поиска" style="margin-bottom: 10px;">
                     <a-radio-group v-model:value="searchStore.mode" button-style="solid">
-                        <a-radio-button :value="SearchMode.Login"
-                            @click="searchStore.setSearchMode(SearchMode.Login)">Логину</a-radio-button>
-                        <a-radio-button :value="SearchMode.UUID"
-                            @click="searchStore.setSearchMode(SearchMode.UUID)">Ключу</a-radio-button>
+                        <a-radio-button :value="SearchMode.Login" @click="searchStore.setSearchMode(SearchMode.Login)">Логину</a-radio-button>
+                        <a-radio-button :value="SearchMode.UUID" @click="searchStore.setSearchMode(SearchMode.UUID)">Ключу</a-radio-button>
                     </a-radio-group>
                 </a-form-item>
 
-                <a-form-item name="searchData" :rules="[{ required: true, message: 'Обязательно к заполнению' }]" label="Данные для поиска">
+                <a-form-item name="searchData" :rules="[{ required: true, message: 'Обязательно к заполнению' }]" :label="searchStore.mode == SearchMode.Login ? 'Логин' : 'Значение ключа'">
                     <a-input v-model:value="model.searchData" placeholder="" />
                 </a-form-item>
             </a-form>

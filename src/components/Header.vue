@@ -2,7 +2,6 @@
 import PlusIcon from '../assets/icons/plus.svg'
 import DeleteIcon from '../assets/icons/delete.svg'
 import SearchIcon from '../assets/icons/zoomIn.svg'
-import CloseIcon from '../assets/icons/exitOfState.svg'
 
 import { useUserStore } from '../stores/user'
 import { useSearchStore } from '../stores/search'
