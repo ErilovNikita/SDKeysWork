@@ -1,4 +1,4 @@
-const parseRuDate = (value: string): Date | null => {
+export const parseRuDate = (value: string): Date | null => {
   const match = value.match(
     /^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})$/
   )

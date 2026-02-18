@@ -3,12 +3,17 @@ import {notification} from "ant-design-vue"
 
 import { IKeyInfo } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
+import { parseRuDate } from "../../utils/services"
+import { useSearchStore } from "../../stores/search"
 
 import ClockIcon from '../../assets/icons/clock.svg'
 
+const searchStore = useSearchStore()
 const props = defineProps<{accessKey: IKeyInfo}>()
 const api:ConnectorService = new ConnectorService()
 const usingEnvAccessKey:string | null = import.meta.env.VITE_ACCESS_KEY
+const keyExpired = parseRuDate(props.accessKey.deadline)?.getTime()! <= new Date().getTime()
+const keyActive = props.accessKey.active && !keyExpired
 
 const errorSwitch = (e: any):void => {
   notification.error({
@@ -26,6 +31,7 @@ const successSwitch = (description:string):any => {
     placement: 'bottomRight',
     duration: 5
   })
+  searchStore.setSearchData(searchStore.data!)
 }
 
 const toggle = ():void => {
@@ -41,8 +47,8 @@ const toggle = ():void => {
 
 <template>
     <div class="switch">
-      <a-switch v-model:checked="props.accessKey.active" @click='toggle' size="small" v-if="props.accessKey.uuid != usingEnvAccessKey"/>
       <ClockIcon style="opacity: .5;" v-if="props.accessKey.uuid == usingEnvAccessKey"/>
+      <a-switch v-model:checked="keyActive" :disabled="keyExpired" @click='toggle' size="small" v-else/>
     </div>
 </template>
 
