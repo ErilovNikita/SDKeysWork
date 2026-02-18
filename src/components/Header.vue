@@ -51,6 +51,7 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
           <a-button 
             type="primary" 
             class="cardButton" 
+            v-if="user?.superUser"
             @click="emit('showModal:Search')"
           >
             <SearchIcon />Поиск

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import themeConfig from './themeProvider'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 import {useSearchStore} from './stores/search.ts'
 import {useUserStore} from './stores/user.ts'
@@ -18,6 +18,8 @@ import CreateKeyModal from './components/modal/CreateKey.vue'
 import DeleteKeysModal from "./components/modal/DeleteKeys.vue"
 import AccessKeyModal from "./components/modal/AccessKey.vue"
 import SearchModal from "./components/modal/Search.vue"
+
+const appReady = ref(false)
 
 const searchStore = useSearchStore()
 const UserStore = useUserStore()
@@ -44,30 +46,41 @@ const handleSearch = async (value: string):Promise<any> => {
     if (result === 'success') handleKeyInfoModalShow()
   }
 }
+
+onMounted(async () => {
+  try {
+    const data: IUser = await new ConnectorService().getUserData()
+    UserStore.setUser(data)
+  } finally {
+    appReady.value = true
+  }
+})
 </script>
 
 <template>
   <a-config-provider :theme="themeConfig">
-    <StatesModal v-if="isDev()"/>
-    <CreateKeyModal ref="createKeyModalRef"/>
-    <DeleteKeysModal ref="deleteKeysModalRef"/>
-    <AccessKeyModal ref="KeyInfoModalRef"/>
-    <SearchModal ref="SearchModalRef" @search="handleSearch" />
+    <template v-if="appReady">
+      <StatesModal v-if="isDev()"/>
+      <CreateKeyModal ref="createKeyModalRef"/>
+      <DeleteKeysModal ref="deleteKeysModalRef"/>
+      <AccessKeyModal ref="KeyInfoModalRef"/>
+      <SearchModal ref="SearchModalRef" @search="handleSearch" />
 
-    <Header 
-      @showModal:CreateKey="handleCreateKeyModalShow"
-      @showModal:DeleteAllKeys="handleDeleteKeysModalShow"
-      @showModal:Search="handleSearchModalShow"
-      @search:Reset="handleResetSearch"
-    />
+      <Header 
+        @showModal:CreateKey="handleCreateKeyModalShow"
+        @showModal:DeleteAllKeys="handleDeleteKeysModalShow"
+        @showModal:Search="handleSearchModalShow"
+        @search:Reset="handleResetSearch"
+      />
 
-    <KeysList ref="KeysListRef" />
+      <KeysList ref="KeysListRef" />
 
-    <MessageTemplate 
-      v-if="!UserStore.canUse"
-      emoji="✨"
-      header="Ваших прав не достаточно"
-      description="Но вы можете посмотреть как тут красиво"
-    />
+      <MessageTemplate 
+        v-if="!UserStore.canUse"
+        emoji="✨"
+        header="Ваших прав не достаточно"
+        description="Но вы можете посмотреть как тут красиво"
+      />
+    </template>
   </a-config-provider>
 </template>

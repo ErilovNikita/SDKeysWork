@@ -13,7 +13,9 @@ import { SearchMode, IKeyInfo, IKeysList, IPagination } from "../utils/types"
 import { formatSmartDate, criticalDeadline } from "../utils/services"
 import ConnectorService from "../utils/connector"
 import { useSearchStore } from "../stores/search"
+import { useUserStore } from "../stores/user"
 
+const user = useUserStore()
 const searchStore = useSearchStore()
 const api: ConnectorService = new ConnectorService()
 
@@ -41,9 +43,14 @@ const handleTableChange = (newPagination: IPagination) => {
 const getPage = (type:'all'|'user' = 'all') =>  {
   loading.value = true
   let promise: Promise<IKeysList>
-  
-  if (type == 'user') promise = api.getUserAccessKeysPage(searchStore.data!, pagination.value.current, pagination.value.pageSize)
-  else promise = api.getAllAccessKeysPage(pagination.value.current, pagination.value.pageSize)
+
+  if (user.superUser == false && user.canUse == true) {
+    promise = api.getUserAccessKeysPage(user.login!, pagination.value.current, pagination.value.pageSize)
+  } else {
+    if (type == 'user') promise = api.getUserAccessKeysPage(searchStore.data!, pagination.value.current, pagination.value.pageSize)
+    else promise = api.getAllAccessKeysPage(pagination.value.current, pagination.value.pageSize)
+  }
+
   promise.then((data: IKeysList) => {
     pagination.value.total = data.pages.count
     elements.value.length = 0
