@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue"
 import { IKeyInfo } from "../../utils/types"
+import { usePlatform } from '../../composables/usePlatform'
 
+const { isMac } = usePlatform()
 const props = defineProps<{ accessKey: IKeyInfo }>()
 const showText = ref(false)
 const tooltipTitle = ref<string>("Скопировать")
@@ -21,7 +23,7 @@ const handleClick = () => {
   <a-space direction="horizontal">
     <a-tooltip :title="tooltipTitle" class="uuid-text" :trigger="['hover']" placement="top">
       <a-skeleton-button 
-        :active="true" 
+        :active="isMac"
         shape="round" 
         class="key-skeleton"
         v-if="!showText"
