@@ -19,6 +19,7 @@ const ok = async ():Promise<void> => {
   if (ok) {
     controller.hidden()
     emit('search', model.searchData)
+    model.searchData = ""
   }
 }
 
