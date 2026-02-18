@@ -1,5 +1,6 @@
 body {
     margin: 0 !important;
+    min-height: 700px !important;
 }
 .ant-modal-root .ant-modal-mask {
     background-color: rgba(255, 255, 255, 0.5) !important;
