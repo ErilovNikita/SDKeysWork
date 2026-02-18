@@ -22,27 +22,27 @@ import SearchModal from "./components/modal/Search.vue"
 const appReady = ref(false)
 
 const searchStore = useSearchStore()
-const UserStore = useUserStore()
+const userStore = useUserStore()
 
-const KeysListRef = ref<InstanceType<typeof KeysList> | null>(null)
+const keysListRef = ref<InstanceType<typeof KeysList> | null>(null)
 const createKeyModalRef = ref<InstanceType<typeof CreateKeyModal> | null>(null)
 const deleteKeysModalRef = ref<InstanceType<typeof DeleteKeysModal> | null>(null)
-const KeyInfoModalRef = ref<InstanceType<typeof AccessKeyModal> | null>(null)
-const SearchModalRef = ref<InstanceType<typeof SearchModal> | null>(null)
+const keyInfoModalRef = ref<InstanceType<typeof AccessKeyModal> | null>(null)
+const searchModalRef = ref<InstanceType<typeof SearchModal> | null>(null)
 
-new ConnectorService().getUserData().then( (data:IUser) => UserStore.setUser(data))
+new ConnectorService().getUserData().then( (data:IUser) => userStore.setUser(data))
 
 const handleCreateKeyModalShow = ():any => createKeyModalRef.value?.controller.show()
 const handleDeleteKeysModalShow = ():any => deleteKeysModalRef.value?.controller.show()
-const handleKeyInfoModalShow = ():any => KeyInfoModalRef.value?.controller.show()
-const handleSearchModalShow = ():any => SearchModalRef.value?.controller.show()
-const handleResetSearch = ():any => KeysListRef.value?.getPage('all')
+const handleKeyInfoModalShow = ():any => keyInfoModalRef.value?.controller.show()
+const handleSearchModalShow = ():any => searchModalRef.value?.controller.show()
+const handleResetSearch = ():any => keysListRef.value?.getPage('all')
 const handleSearch = async (value: string):Promise<any> => {
   searchStore.setSearchData(value)
   
   if (searchStore.mode === SearchMode.UUID) {
-    if (!KeyInfoModalRef.value) return
-    const result = await KeyInfoModalRef.value.waitForResult()
+    if (!keyInfoModalRef.value) return
+    const result = await keyInfoModalRef.value.waitForResult()
     if (result === 'success') handleKeyInfoModalShow()
   }
 }
@@ -50,7 +50,7 @@ const handleSearch = async (value: string):Promise<any> => {
 onMounted(async () => {
   try {
     const data: IUser = await new ConnectorService().getUserData()
-    UserStore.setUser(data)
+    userStore.setUser(data)
   } finally {
     appReady.value = true
   }
@@ -76,7 +76,7 @@ onMounted(async () => {
       <KeysList ref="KeysListRef" />
 
       <MessageTemplate 
-        v-if="!UserStore.canUse"
+        v-if="!userStore.canUse"
         emoji="✨"
         header="Ваших прав не достаточно"
         description="Но вы можете посмотреть как тут красиво"

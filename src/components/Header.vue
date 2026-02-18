@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const searchStore = useSearchStore()
-const user = useUserStore()
+const userStore = useUserStore()
 const versionController = new AlertFiledObject(false, 'info', true)
 
 getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
@@ -46,12 +46,12 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
 <template>
   <a-row class="header">
     <a-col :span="12">
-      <a-space v-if="user?.canUse">
+      <a-space v-if="userStore?.canUse">
         <a-space :size="1">
           <a-button 
             type="primary" 
             class="cardButton" 
-            v-if="user?.superUser"
+            v-if="userStore?.superUser"
             @click="emit('showModal:Search')"
           >
             <SearchIcon />Поиск

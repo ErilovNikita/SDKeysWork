@@ -13,7 +13,7 @@ import { AlertFiledObject, ModalController } from '../../utils/fileds.ts'
 const controller = new ModalController("Создать ключ")
 const descriptionAlertController = new AlertFiledObject(false, 'info', true, "Для чего используется ключ").show()
 
-const user = useUserStore()
+const userStore = useUserStore()
 const searchStore = useSearchStore()
 
 const api: ConnectorService = new ConnectorService()
@@ -24,7 +24,7 @@ const dateFormat = ref<string>('DD.MM.YYYY HH:mm')
 defineExpose({controller})
 
 const model = reactive<ICreateKeyForm>({
-  login: user.login,
+  login: userStore.login,
   deadline: null,
   deadlineMode: "days",
   keyDays: null,
@@ -80,7 +80,7 @@ const ok = async ():Promise<void> => {
   <Modal :controller="controller">
     <template #form>
       <a-form ref="formRef" :model="model" class="main-container" layout="vertical">
-        <a-form-item name="login" :rules="[{ required: true, message: 'Надо' }]" v-if="user.superUser" label="Логин пользователя">
+        <a-form-item name="login" :rules="[{ required: true, message: 'Надо' }]" v-if="userStore.superUser" label="Логин пользователя">
           <a-input class="field" v-model:value="model.login" />
         </a-form-item>
 

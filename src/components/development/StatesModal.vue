@@ -3,7 +3,7 @@ import { useSearchStore } from '../../stores/search'
 import { useUserStore } from '../../stores/user'
 
 const searchStore = useSearchStore()
-const UserStore = useUserStore()
+const userStore = useUserStore()
 
 </script>
 
@@ -11,11 +11,11 @@ const UserStore = useUserStore()
     <a-collapse class="site-collapse-custom-collapse" :accordion="true">
         <a-collapse-panel key="1" header="Отладочные данные">
             <p class="header">Пользовательские данные:</p>
-            <p><b>login: </b>{{ UserStore.login }}</p>
-            <p><b>title: </b>{{ UserStore.title }}</p>
-            <p><b>uuid: </b>{{ UserStore.uuid }}</p>
-            <p><b>profiles: </b>{{ UserStore.profiles }}</p>
-            <p><b>roles: </b>{{ UserStore.roles }}</p>
+            <p><b>login: </b>{{ userStore.login }}</p>
+            <p><b>title: </b>{{ userStore.title }}</p>
+            <p><b>uuid: </b>{{ userStore.uuid }}</p>
+            <p><b>profiles: </b>{{ userStore.profiles }}</p>
+            <p><b>roles: </b>{{ userStore.roles }}</p>
             
             <p class="header">Глобальные данные приложения:</p>
             <p><b>searchData: </b>{{ searchStore.data }}</p>

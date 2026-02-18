@@ -10,13 +10,13 @@ import { ModalController } from '../../utils/fileds.ts'
 
 type ConfirmItem = { options: { label: string; value: boolean }[] }
 const controller = new ModalController("Создать ключ")
-const user = useUserStore()
+const userStore = useUserStore()
 const api: ConnectorService = new ConnectorService()
 const formRef = ref()
 const confirmationsMeta = ref<ConfirmItem[]>([])
 
 const model = reactive<any>({
-  localLogin: user.login,
+  localLogin: userStore.login,
   confirmations: []
 })
 
@@ -87,7 +87,7 @@ const ok = async () =>  {
   <Modal :controller="controller">
     <template #form>
       <a-form class="main-container" layout="vertical" ref="formRef" :model="model">
-        <a-form-item label="Логин пользователя" v-if="user.superUser" name="localLogin" class="field"
+        <a-form-item label="Логин пользователя" v-if="userStore.superUser" name="localLogin" class="field"
           :rules="[{ required: true, message: 'Обязательное поле' }]">
           <a-input v-model:value="model.localLogin" />
         </a-form-item>

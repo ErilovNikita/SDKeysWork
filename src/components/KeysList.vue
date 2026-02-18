@@ -15,7 +15,7 @@ import ConnectorService from "../utils/connector"
 import { useSearchStore } from "../stores/search"
 import { useUserStore } from "../stores/user"
 
-const user = useUserStore()
+const userStore = useUserStore()
 const searchStore = useSearchStore()
 const api: ConnectorService = new ConnectorService()
 
@@ -44,8 +44,8 @@ const getPage = (type:'all'|'user' = 'all') =>  {
   loading.value = true
   let promise: Promise<IKeysList>
 
-  if (user.superUser == false && user.canUse == true) {
-    promise = api.getUserAccessKeysPage(user.login!, pagination.value.current, pagination.value.pageSize)
+  if (userStore.superUser == false && userStore.canUse == true) {
+    promise = api.getUserAccessKeysPage(userStore.login!, pagination.value.current, pagination.value.pageSize)
   } else {
     if (type == 'user') promise = api.getUserAccessKeysPage(searchStore.data!, pagination.value.current, pagination.value.pageSize)
     else promise = api.getAllAccessKeysPage(pagination.value.current, pagination.value.pageSize)
