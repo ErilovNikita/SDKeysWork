@@ -44,10 +44,11 @@ const yes = () => {
 <template>
   <Modal :controller="controller">
     <template #form>
-      <p>Восстановить не получится.</p>
+      <p>Вы действительно хотите удалить ключ "<code>{{ props.accessKey.uuid }}</code>"?</p>
+      <p>Данные будут потеряны навсегда.</p>
     </template>
     <template #footer>
-      <a-button type="primary" @click="yes">Да</a-button>
+      <a-button type="primary" @click="yes">Удалить ключ</a-button>
       <a-button type="text" @click="controller.hidden()">Отмена</a-button>
     </template>
   </Modal>
