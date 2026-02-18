@@ -63,8 +63,8 @@ onMounted(async () => {
       <StatesModal v-if="isDev()"/>
       <CreateKeyModal ref="createKeyModalRef"/>
       <DeleteKeysModal ref="deleteKeysModalRef"/>
-      <AccessKeyModal ref="KeyInfoModalRef"/>
-      <SearchModal ref="SearchModalRef" @search="handleSearch" />
+      <AccessKeyModal ref="keyInfoModalRef"/>
+      <SearchModal ref="searchModalRef" @search="handleSearch" />
 
       <Header 
         @showModal:CreateKey="handleCreateKeyModalShow"
@@ -73,7 +73,7 @@ onMounted(async () => {
         @search:Reset="handleResetSearch"
       />
 
-      <KeysList ref="KeysListRef" />
+      <KeysList ref="keysListRef" />
 
       <MessageTemplate 
         v-if="!userStore.canUse"
