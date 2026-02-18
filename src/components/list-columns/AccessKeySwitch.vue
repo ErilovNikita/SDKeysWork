@@ -4,12 +4,10 @@ import {notification} from "ant-design-vue"
 import { IKeyInfo } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
 import { parseRuDate } from "../../utils/services"
-import { useSearchStore } from "../../stores/search"
 
 import ClockIcon from '../../assets/icons/clock.svg'
 import { computed } from "vue"
 
-const searchStore = useSearchStore()
 const props = defineProps<{accessKey: IKeyInfo}>()
 const api:ConnectorService = new ConnectorService()
 const usingEnvAccessKey:string | null = import.meta.env.VITE_ACCESS_KEY
@@ -38,11 +36,11 @@ const successSwitch = (description:string):any => {
     placement: 'bottomRight',
     duration: 5
   })
-  searchStore.setSearchData(searchStore.data!)
+  props.accessKey.active = !props.accessKey.active
 }
 
 const toggle = ():void => {
-  if (props.accessKey.active) api.enableKey(props.accessKey.uuid)
+  if (!props.accessKey.active) api.enableKey(props.accessKey.uuid)
     .then(successSwitch("Ключ доступа активирован"))
     .catch(errorSwitch)
   else api.disableKey(props.accessKey.uuid)
