@@ -7,11 +7,15 @@ import Modal from '../../components/naumen/Modal.vue'
 import type { ICreateKeyForm } from "../../utils/types.ts"
 import ConnectorService from '../../utils/connector.ts'
 import { useUserStore } from '../../stores/user.ts'
+import { useSearchStore } from '../../stores/search'
 import { AlertFiledObject, ModalController } from '../../utils/fileds.ts'
 
 const controller = new ModalController("Создать ключ")
 const descriptionAlertController = new AlertFiledObject(false, 'info', true, "Для чего используется ключ").show()
+
 const user = useUserStore()
+const searchStore = useSearchStore()
+
 const api: ConnectorService = new ConnectorService()
 const formRef = ref()
 const loading = ref<boolean>(false)
@@ -48,6 +52,7 @@ const createNewToken = async (): Promise<void> => {
       placement: 'bottomRight',
       duration: 5
     })
+    searchStore.setSearchData(searchStore.data!)
   }).catch((e: any) => {
     notification.error({
       message: "Произошла ошибка",
