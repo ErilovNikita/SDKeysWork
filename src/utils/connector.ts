@@ -139,6 +139,22 @@ export default class ConnectorService {
     }
 
     /**
+     * Редактировать существующий ключ
+     * @param uuid uuid ключа
+     * @param description описание
+     * @param deadline дедлайн
+     */
+    async editAccessKey(
+        uuid: string,
+        description: string,
+        deadline: string
+    ): Promise<IKeyInfo> {
+        const initUrl = `/exec?params=request,response,user&func=modules.${ConnectorService.CONTROLLER_MODULE_CODE}.updateKey&uuid=${uuid}&description=${description}&deadline=${deadline}`
+        const response = await jsApi.restCallAsJson(initUrl, {method: "GET"})
+        return response as IKeyInfo
+    }
+
+    /**
      * Получить информацию по ключу
      * @param accessKey uuid ключа
      */

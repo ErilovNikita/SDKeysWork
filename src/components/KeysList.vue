@@ -5,6 +5,7 @@ import { notification } from 'ant-design-vue'
 import AccessKeySpan from "./list-columns/AccessKeySpan.vue"
 import AccessKeySwitch from "./list-columns/AccessKeySwitch.vue"
 import DeleteKey from "./list-columns/DeleteKeyButton.vue"
+import EditKey from "./list-columns/EditKeyButton.vue"
 
 import LinkIcon from '../assets/icons/link.svg'
 import PrivacyIcon from '../assets/icons/privacy.svg'
@@ -80,7 +81,8 @@ onMounted(() => getPage())
 defineExpose({getPage})
 
 watch(() => searchStore.trigger, () => {
-  if (searchStore.mode === SearchMode.Login) getPage('user')
+  if (searchStore.mode === SearchMode.Login && searchStore.data) getPage('user') 
+  else getPage('all')
 })
 </script>
 
@@ -135,7 +137,7 @@ watch(() => searchStore.trigger, () => {
         </a-tag>
       </template>
     </a-table-column>
-    <a-table-column title="JSON" data-index="key" :filteredValue="false" key="key" align="center">
+    <a-table-column title="" data-index="delete" key="delete" align="center">
       <template #customRender="{ record }">
         <a-popover>
           <template #content>
@@ -148,10 +150,7 @@ watch(() => searchStore.trigger, () => {
             :icon="h(PrivacyIcon)"
           />
         </a-popover>
-      </template>
-    </a-table-column>
-    <a-table-column title="Удалить" data-index="delete" key="delete" align="center">
-      <template #customRender="{ record }">
+        <EditKey :access-key="record"/>
         <DeleteKey :access-key="record"/>
       </template>
     </a-table-column>

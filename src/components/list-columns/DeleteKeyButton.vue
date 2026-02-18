@@ -11,6 +11,7 @@ import { ModalController } from "../../utils/fileds"
 import { useSearchStore } from "../../stores/search"
 
 const props = defineProps<{ accessKey: IKeyInfo }>()
+const usingEnvAccessKey:string | null = import.meta.env.VITE_ACCESS_KEY
 const searchStore = useSearchStore()
 const controller = new ModalController("Вы уверены?")
 const api: ConnectorService = new ConnectorService()
@@ -59,6 +60,7 @@ const yes = () => {
     shape="circle"
     @click="controller.show()"
     :icon="h(DeleteIcon)"
+    v-if="props.accessKey.uuid != usingEnvAccessKey"
   />
 </template>
 

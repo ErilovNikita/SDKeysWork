@@ -66,6 +66,11 @@ interface ICreateKeyForm {
   onetime: boolean
 }
 
+interface IEditKeyForm {
+  deadline: string,
+  description: string,
+}
 
-export type {IUser, IInitialData, IPages, IKeysList, IKeyInfo, IPagination, ICreateKeyForm}
+
+export type {IUser, IInitialData, IPages, IKeysList, IKeyInfo, IPagination, ICreateKeyForm, IEditKeyForm}
 export {SearchMode}

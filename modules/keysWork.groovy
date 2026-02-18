@@ -1,11 +1,12 @@
 /**
  * Автор: Erilov.NA
  * Дата создания: 12.07.2024
- * Версия: 5
+ * Версия: 5.2
  * История:
  * nerilov - 12.07.2024 - v4.1.1 - создано
- * ekazantsev - 05.02.2025 - v5 - переписано на web_api_components с добавлением валидации пользователя + добавлены новые методы
- * ekazantsev - 09.02.2025 - v5.1 - добавлен метод получения всех ключей. исправлены баги пагинации
+ * ekazantsev - 05.02.2026 - v5 - переписано на web_api_components с добавлением валидации пользователя + добавлены новые методы
+ * ekazantsev - 09.02.2026 - v5.1 - добавлен метод получения всех ключей. исправлены баги пагинации
+ * nerilov - 18.02.2026 - v5.2 - добавлен метод для редактирования ключей
  *
  * Исходники ВП вы можете найти в репозиторих:
  * https://github.com/ErilovNikita/SDKeysWork/tree/main - основной
@@ -342,6 +343,31 @@ void addAccessKey(HttpServletRequest request, HttpServletResponse response, ISDt
 
 /**
  * GET
+ * Метод для редактирования существующего ключа с помощью его UUID
+ * url параметры:
+ * description - описание ключа. не обязательный
+ * deadline - конкретный дедлайн ключа. паттерн указан в константах
+ */
+@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
+void updateKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
+        PermissionsService.assertUserCanUseApplication(user)
+        String uuid = webUtils.getParamElseThrow('uuid')
+        def dao = api.auth.accessKeyDao
+        def key = dao.get(uuid)
+        String username = key.username
+        PermissionsService.asserUsersLogin(user, username)
+        String description = webUtils.getParam('description').orElse(null)
+        Date deadline = webUtils.getParamElseThrow('deadline', Date)
+        key.setDescription(description)
+        key.setDeadline(deadline)
+        dao.update(key)
+        webUtils.setBodyAsJson(key)
+    }
+}
+
+/**
+ * GET
  * Метод для деактивации ключа с помощью его UUID
  * url параметры:
  * uuid - UUID самого ключа
@@ -460,23 +486,3 @@ void getInitData(HttpServletRequest request, HttpServletResponse response, ISDtO
         )
     }
 }
-
-/*
-//TODO на будущее
-@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void updateKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
-    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
-        PermissionsService.assertUserCanUseApplication(user)
-        String uuid = webUtils.getParamElseThrow('uuid')
-        def dao = api.auth.accessKeyDao
-        def key = dao.get(uuid)
-        String username = key.username
-        PermissionsService.asserUsersLogin(user, username)
-        String description = webUtils.getParam('description').orElse(null)
-        String deadline = webUtils.getParamElseThrow('deadline', Date)
-        key.setDescription(description)
-        key.setDeadline(deadline)
-        dao.update(key)
-    }
-}
- */
