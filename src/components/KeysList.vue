@@ -75,10 +75,11 @@ const getPage = (type:'all'|'user' = 'all') =>  {
   }).finally(() => loading.value = false)
 }
 const getUrl = (uuid: string) => `${jsApi.getAppBaseUrl()}operator/#uuid:${uuid}`
+const resetCurrentPage = () => pagination.value.current = 1
 
 onMounted(() => getPage())
 
-defineExpose({getPage})
+defineExpose({getPage, resetCurrentPage})
 
 watch(() => searchStore.trigger, () => {
   if (searchStore.mode === SearchMode.Login && searchStore.data) getPage('user') 

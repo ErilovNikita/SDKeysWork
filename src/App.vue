@@ -36,9 +36,14 @@ const handleCreateKeyModalShow = ():any => createKeyModalRef.value?.controller.s
 const handleDeleteKeysModalShow = ():any => deleteKeysModalRef.value?.controller.show()
 const handleKeyInfoModalShow = ():any => keyInfoModalRef.value?.controller.show()
 const handleSearchModalShow = ():any => searchModalRef.value?.controller.show()
-const handleResetSearch = ():any => keysListRef.value?.getPage('all')
+const handleResetSearch = ():any => {
+  keysListRef.value?.getPage('all')
+  keysListRef.value?.resetCurrentPage()
+}
 const handleSearch = async (value: string):Promise<any> => {
   searchStore.setSearchData(value)
+  
+  if (searchStore.mode === SearchMode.Login) keysListRef.value?.resetCurrentPage()
   
   if (searchStore.mode === SearchMode.UUID) {
     if (!keyInfoModalRef.value) return
