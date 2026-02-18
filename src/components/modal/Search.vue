@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 
 import Modal from '../../components/naumen/Modal.vue'
 import { useSearchStore } from '../../stores/search'
@@ -22,6 +22,8 @@ const ok = async ():Promise<void> => {
     model.searchData = ""
   }
 }
+
+watch(() => searchStore.mode, () => model.searchData = "")
 
 defineExpose({ controller })
 </script>
