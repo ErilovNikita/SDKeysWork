@@ -7,13 +7,20 @@ import { parseRuDate } from "../../utils/services"
 import { useSearchStore } from "../../stores/search"
 
 import ClockIcon from '../../assets/icons/clock.svg'
+import { computed } from "vue"
 
 const searchStore = useSearchStore()
 const props = defineProps<{accessKey: IKeyInfo}>()
 const api:ConnectorService = new ConnectorService()
 const usingEnvAccessKey:string | null = import.meta.env.VITE_ACCESS_KEY
-const keyExpired = parseRuDate(props.accessKey.deadline)?.getTime()! <= new Date().getTime()
-const keyActive = props.accessKey.active && !keyExpired
+const keyExpired = computed(() => {
+  const date = parseRuDate(props.accessKey.deadline)
+  if (!date) return false
+  return date.getTime() <= Date.now()
+})
+const keyActive = computed(() => {
+  return props.accessKey.active && !keyExpired.value
+})
 
 const errorSwitch = (e: any):void => {
   notification.error({
@@ -48,7 +55,7 @@ const toggle = ():void => {
 <template>
     <div class="switch">
       <ClockIcon style="opacity: .5;" v-if="props.accessKey.uuid == usingEnvAccessKey"/>
-      <a-switch v-model:checked="keyActive" :disabled="keyExpired" @click='toggle' size="small" v-else/>
+      <a-switch :checked="keyActive" :disabled="keyExpired" @click='toggle' size="small" v-else/>
     </div>
 </template>
 
