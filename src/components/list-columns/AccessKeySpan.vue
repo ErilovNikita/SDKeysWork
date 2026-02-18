@@ -44,6 +44,5 @@ const handleClick = () => {
 .uuid-text {
   font-family: monospace;
   cursor: pointer;
-  user-select: all;
 }
 </style>
