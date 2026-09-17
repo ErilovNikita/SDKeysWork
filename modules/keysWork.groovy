@@ -1,12 +1,11 @@
 /**
  * Автор: Erilov.NA
  * Дата создания: 12.07.2024
- * Версия: 5.2
+ * Версия: 5
  * История:
  * nerilov - 12.07.2024 - v4.1.1 - создано
- * ekazantsev - 05.02.2026 - v5 - переписано на web_api_components с добавлением валидации пользователя + добавлены новые методы
- * ekazantsev - 09.02.2026 - v5.1 - добавлен метод получения всех ключей. исправлены баги пагинации
- * nerilov - 18.02.2026 - v5.2 - добавлен метод для редактирования ключей
+ * ekazantsev - 05.02.2025 - v5 - переписано на web_api_components с добавлением валидации пользователя + добавлены новые методы
+ * ekazantsev - 09.02.2025 - v5.1 - добавлен метод получения всех ключей. исправлены баги пагинации
  *
  * Исходники ВП вы можете найти в репозиторих:
  * https://github.com/ErilovNikita/SDKeysWork/tree/main - основной
@@ -26,7 +25,7 @@ import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.accesskeys.AccessKey
 
 //из либы https://github.com/exeki/nsd.sdk.global_variables для типизации
-//import static ru.kazantsev.nsd.sdk.global_variables.ApiPlaceholder.*;
+import static ru.kazantsev.nsd.sdk.global_variables.ApiPlaceholder.*;
 
 /**
  * Параметры, от низ зависит как будет работать модуль
@@ -37,10 +36,12 @@ abstract class Parameters {
      * которые соответствуют перечисленным хостам в параметре TEST_HOSTS.
      * При этом пользователи смогут работать только со своими ключами.
      */
-    static final Boolean ALLOW_TO_ALL_IN_TEST_ENV = false
+    static final Boolean ALLOW_TO_ALL_IN_TEST_ENV = true
     /** Продакшн хост */
     static final List<String> TEST_HOSTS = [
-
+            'pss.test.ocs.ru',
+            'pss.staging.ocs.ru',
+            'pss.dev.ocs.ru'
     ]
 }
 
@@ -252,10 +253,11 @@ abstract class PermissionsService {
  * pageSize - размер страницы
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getUserAccessKeysPage(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getUserAccessKeysPage(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String value = webUtils.getParamElseThrow('value').toLowerCase()
+        //if(user) value = user.login
         PermissionsService.asserUsersLogin(user, value)
         Utilities.getUserOrThrow(value)
         Integer currentPage = webUtils.getParam('pageNumber', Integer).orElse(1)
@@ -283,7 +285,7 @@ void getUserAccessKeysPage(HttpServletRequest request, HttpServletResponse respo
  * pageSize - размер страницы
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getAllAccessKeysPage(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getAllAccessKeysPage(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserIsSuperuser(user)
         Integer currentPage = webUtils.getParam('pageNumber', Integer).orElse(1)
@@ -304,7 +306,7 @@ void getAllAccessKeysPage(HttpServletRequest request, HttpServletResponse respon
 }
 
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getAccessKeyInfo(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getAccessKeyInfo(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String value = webUtils.getParamElseThrow('uuid').toLowerCase()
@@ -324,7 +326,7 @@ void getAccessKeyInfo(HttpServletRequest request, HttpServletResponse response, 
  * deadline - конкретный дедлайн ключа. паттерн указан в константах
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void addAccessKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void addAccessKey(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String login = webUtils.getParamElseThrow('login')
@@ -343,37 +345,12 @@ void addAccessKey(HttpServletRequest request, HttpServletResponse response, ISDt
 
 /**
  * GET
- * Метод для редактирования существующего ключа с помощью его UUID
- * url параметры:
- * description - описание ключа. не обязательный
- * deadline - конкретный дедлайн ключа. паттерн указан в константах
- */
-@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void updateKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
-    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
-        PermissionsService.assertUserCanUseApplication(user)
-        String uuid = webUtils.getParamElseThrow('uuid')
-        def dao = api.auth.accessKeyDao
-        def key = dao.get(uuid)
-        String username = key.username
-        PermissionsService.asserUsersLogin(user, username)
-        String description = webUtils.getParam('description').orElse(null)
-        Date deadline = webUtils.getParamElseThrow('deadline', Date)
-        key.setDescription(description)
-        key.setDeadline(deadline)
-        dao.update(key)
-        webUtils.setBodyAsJson(key)
-    }
-}
-
-/**
- * GET
  * Метод для деактивации ключа с помощью его UUID
  * url параметры:
  * uuid - UUID самого ключа
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void disableAccessKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void disableAccessKey(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String uuid = webUtils.getParamElseThrow('uuid')
@@ -395,7 +372,7 @@ void disableAccessKey(HttpServletRequest request, HttpServletResponse response, 
  * username - username пользователя
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void deleteUserAccessKeys(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void deleteUserAccessKeys(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String username = webUtils.getParamElseThrow('username')
@@ -419,7 +396,7 @@ void deleteUserAccessKeys(HttpServletRequest request, HttpServletResponse respon
  * uuid - UUID самого ключа
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void activateAccessKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void activateAccessKey(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String uuid = webUtils.getParamElseThrow('uuid')
@@ -435,7 +412,7 @@ void activateAccessKey(HttpServletRequest request, HttpServletResponse response,
  * uuid - UUID самого ключа
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void deleteAccessKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void deleteAccessKey(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String uuid = webUtils.getParamElseThrow('uuid')
@@ -454,7 +431,7 @@ void deleteAccessKey(HttpServletRequest request, HttpServletResponse response, I
  * @param login - Логин пользователя
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getThemeByUser(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getThemeByUser(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String login = webUtils.getParamElseThrow('login')
@@ -476,7 +453,7 @@ void getThemeByUser(HttpServletRequest request, HttpServletResponse response, IS
  * Получить данные для инициализации
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getInitData(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getInitData(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         webUtils.setBodyAsJson(
                 new Dto.InitialData(
@@ -484,5 +461,30 @@ void getInitData(HttpServletRequest request, HttpServletResponse response, ISDtO
                         canUse: PermissionsService.canUserUseApplication(user)
                 )
         )
+    }
+}
+
+/**
+ * GET
+ * Метод для редактирования существующего ключа с помощью его UUID
+ * url параметры:
+ * description - описание ключа. не обязательный
+ * deadline - конкретный дедлайн ключа. паттерн указан в константах
+ */
+@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
+void updateKey(HttpServletRequest r1 = null, HttpServletResponse r2 = null, ISDtObject u3 = null) {
+    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
+        PermissionsService.assertUserCanUseApplication(user)
+        String uuid = webUtils.getParamElseThrow('uuid')
+        def dao = api.auth.accessKeyDao
+        def key = dao.get(uuid)
+        String username = key.username
+        PermissionsService.asserUsersLogin(user, username)
+        String description = webUtils.getParam('description').orElse(null)
+        Date deadline = webUtils.getParamElseThrow('deadline', Date)
+        key.setDescription(description)
+        key.setDeadline(deadline)
+        dao.update(key)
+        webUtils.setBodyAsJson(key)
     }
 }

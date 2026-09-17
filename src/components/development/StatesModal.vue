@@ -19,6 +19,7 @@ const userStore = useUserStore()
             
             <p class="header">Глобальные данные приложения:</p>
             <p><b>searchData: </b>{{ searchStore.data }}</p>
+            <p><b>searchMode: </b>{{ searchStore.mode }}</p>
         </a-collapse-panel>
     </a-collapse>
 </template>

@@ -1,4 +1,4 @@
-import type { IUser, IInitialData, IKeyInfo, IKeysList } from "./types"
+import type {IUser, IInitialData, IKeyInfo, IKeysList} from "./types"
 
 /**
  * Подтвердить текущее окружение = разработка
@@ -6,7 +6,7 @@ import type { IUser, IInitialData, IKeyInfo, IKeysList } from "./types"
  * @returns true - если разработка, false - если нет
  */
 export const isDev = (): boolean => {
-  return import.meta.env.MODE == 'development'
+    return import.meta.env.MODE == 'development'
 }
 
 export default class ConnectorService {
@@ -14,41 +14,20 @@ export default class ConnectorService {
     static CONTROLLER_MODULE_CODE: string = 'keysWork'
 
     /**
-     * Получить страницу ключей пользователя
-     * @param login логин пользователя, очевидно блять
+     * Получить страницу ключей
+     * @param searchLogin логин пользователя, очевидно блять
      * @param pageNumber номер страницы
      * @param pageSize размер страницы
      */
-    async getUserAccessKeysPage(
-        login: string,
+    async getAccessKeysPage(
         pageNumber: number | null = 1,
-        pageSize: number | null = 20
+        pageSize: number | null = 20,
+        searchLogin: string | null = null
     ): Promise<IKeysList> {
-        let initUrl = "/exec?params=request,response,user" +
-            "&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getUserAccessKeysPage" +
-            "&value=" + login
+        let initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getAccessKeysPage"
         if (pageNumber) initUrl += "&pageNumber=" + pageNumber.toString()
         if (pageSize) initUrl += "&pageSize=" + pageSize.toString()
-
-
-        const response = await jsApi.restCallAsJson(initUrl, {method: "GET"})
-        return response as IKeysList
-
-    }
-
-    /**
-     * Получить страницу ключей пользователя
-     * @param pageNumber номер страницы
-     * @param pageSize размер страницы
-     */
-    async getAllAccessKeysPage(
-        pageNumber: number | null = 1,
-        pageSize: number | null = 20
-    ): Promise<IKeysList> {
-        let initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getAllAccessKeysPage"
-        if (pageNumber) initUrl += "&pageNumber=" + pageNumber.toString()
-        if (pageSize) initUrl += "&pageSize=" + pageSize.toString()
-
+        if (searchLogin) initUrl += "&searchLogin=" + searchLogin
         const response = await jsApi.restCallAsJson(initUrl, {method: "GET"})
         return response as IKeysList
     }
@@ -60,7 +39,7 @@ export default class ConnectorService {
     async getThemeCode(
         login: String,
     ): Promise<string> {
-        const initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getThemeByUser&login=" + login
+        const initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getThemeByUser&login=" + login
 
         const response = await jsApi.restCall(initUrl, {method: "GET", responseType: "text"})
         return response as string
@@ -74,7 +53,7 @@ export default class ConnectorService {
     async disableKey(
         accessKey: String
     ): Promise<void> {
-        const initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".disableAccessKey&uuid=" + accessKey
+        const initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".disableAccessKey&uuid=" + accessKey
 
         return await jsApi.restCall(initUrl, {method: "GET"})
 
@@ -87,7 +66,7 @@ export default class ConnectorService {
     async enableKey(
         accessKey: String
     ): Promise<void> {
-        const initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".activateAccessKey&uuid=" + accessKey
+        const initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".activateAccessKey&uuid=" + accessKey
 
         return await jsApi.restCall(initUrl, {method: "GET"})
 
@@ -100,7 +79,7 @@ export default class ConnectorService {
     async deleteKey(
         accessKey: String
     ): Promise<void> {
-        const initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".deleteAccessKey&uuid=" + accessKey
+        const initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".deleteAccessKey&uuid=" + accessKey
 
         return await jsApi.restCall(initUrl, {method: "GET"})
     }
@@ -110,7 +89,7 @@ export default class ConnectorService {
      * @param login логин пользователя
      */
     async deleteUserAccessKeys(login: string): Promise<void> {
-        let initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".deleteUserAccessKeys&username=" + login
+        let initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".deleteUserAccessKeys&username=" + login
         await jsApi.restCall(initUrl, {method: "GET"})
     }
 
@@ -129,7 +108,7 @@ export default class ConnectorService {
         disposable: boolean | null = null,
         deadline: string | null = null
     ): Promise<IKeyInfo> {
-        let initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".addAccessKey&login=" + login
+        let initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".addAccessKey&login=" + login
         if (lifespanInDays) initUrl += "&days=" + lifespanInDays.toString()
         if (description) initUrl += "&description=" + description
         if (disposable) initUrl += "&disposable=" + disposable.toString()
@@ -149,7 +128,7 @@ export default class ConnectorService {
         description: string,
         deadline: string
     ): Promise<IKeyInfo> {
-        const initUrl = `/exec?params=request,response,user&func=modules.${ConnectorService.CONTROLLER_MODULE_CODE}.updateKey&uuid=${uuid}&description=${description}&deadline=${deadline}`
+        const initUrl = `/exec?params=&func=modules.${ConnectorService.CONTROLLER_MODULE_CODE}.updateKey&uuid=${uuid}&description=${description}&deadline=${deadline}`
         const response = await jsApi.restCallAsJson(initUrl, {method: "GET"})
         return response as IKeyInfo
     }
@@ -161,7 +140,7 @@ export default class ConnectorService {
     async getAccessKeyInfo(
         accessKey: String
     ): Promise<IKeyInfo> {
-        const initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getAccessKeyInfo&uuid=" + accessKey
+        const initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getAccessKeyInfo&uuid=" + accessKey
         try {
             const response = await jsApi.restCallAsJson(initUrl, {method: "GET"})
             return response as IKeyInfo
@@ -174,9 +153,9 @@ export default class ConnectorService {
      * Получить данные о текущем пользователе
      */
     async getUserData(): Promise<IUser> {
-        const initUrl = "/exec?params=request,response,user&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getInitData"
+        const initUrl = "/exec?params=&func=modules." + ConnectorService.CONTROLLER_MODULE_CODE + ".getInitData"
         try {
-            let currentUser:IUser = jsApi.getCurrentUser()
+            let currentUser: IUser = jsApi.getCurrentUser()
 
             const response: IInitialData = await jsApi.restCallAsJson(initUrl, {method: "GET"})
 

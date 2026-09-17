@@ -1,7 +1,7 @@
 {
   "name": "sdkeyswork",
   "private": true,
-  "version": "5.0.2",
+  "version": "5.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
@@ -12,6 +12,7 @@
   "dependencies": {
     "@highlightjs/vue-plugin": "^2.1.0",
     "@iframe-resizer/child": "^5.5.8",
+    "@minitwiks/js-api": "^2.1.1",
     "ant-design-vue": "^4.2.6",
     "pinia": "^3.0.4",
     "vite-svg-loader": "^5.1.0",
