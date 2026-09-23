@@ -4,7 +4,7 @@ import {createPinia} from 'pinia'
 import App from './App.vue'
 import Antd from 'ant-design-vue'
 import { NsmpVueComponents } from '@minitwiks/nsmp-vue-components'
-import '@iframe-resizer/child'
+import 'iframe-resizer/js/iframeResizer.contentWindow'
 import hljs from 'highlight.js/lib/core'
 import json from 'highlight.js/lib/languages/json'
 import hljsVuePlugin from "@highlightjs/vue-plugin"

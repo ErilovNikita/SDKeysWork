@@ -53,7 +53,7 @@ onMounted(async () => {
 
 <template>
   <ConfigProvider :nsmp-theme="nsmpTheme">
-    <div v-if="appReady" style="background-color: white;">
+    <div v-if="appReady" data-iframe-size style="background-color: white;">
       <StatesModal v-if="isDev()"/>
       <CreateKeyModal v-model:open="modals.create"/>
       <DeleteKeysModal v-model:open="modals.delete"/>
