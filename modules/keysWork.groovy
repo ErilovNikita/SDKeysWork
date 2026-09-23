@@ -11,7 +11,6 @@
  *
  * Исходники ВП вы можете найти в репозиторих:
  * https://github.com/ErilovNikita/SDKeysWork/tree/main - основной
- * https://github.com/exeki/SDKeysWork
  */
 package ru.sdkeyswork.keysWork
 
