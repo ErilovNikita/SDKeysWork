@@ -131,6 +131,7 @@ watch(() => searchStore.trigger, () => {
     view-storage-key="keys"
     show-view-select
     :views="views"
+    :resizableColumns="true"
     :scroll="{ x: 1000 }"
     :selectable="true"
   >
