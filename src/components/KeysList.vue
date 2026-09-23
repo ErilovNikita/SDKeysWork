@@ -151,7 +151,7 @@ watch(() => searchStore.trigger, () => {
       <Button type="default" :icon="FilterIcon" v-if="userStore?.superUser" @click="emit('showModal:Search')">Фильтрация</Button>
       <Button type="default" :icon="DeleteIcon" @click="emit('showModal:DeleteAllKeys')">Удалить все ключи</Button>
 
-      <Alert :closable="false" :open="true" :showIcon="false" class="filter" v-if="searchStore.data">
+      <Alert :closable="false" :open="true" :showIcon="false" class="filter" v-if="searchStore.data && searchStore.mode == SearchMode.Login">
         <template #message>
           <div>
             <a-typography-link class="link" type="text" @click="emit('showModal:Search')">Изменить</a-typography-link>
