@@ -37,11 +37,6 @@ body {
     padding: 10px 20px;
 }
 
-.ant-notification-notice-message {
-    margin-bottom: 0 !important;
-    font-weight: 700;
-}
-
 .key-skeleton,
 .key-skeleton>.ant-skeleton-button {
     width: 290px !important;

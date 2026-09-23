@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue"
 import type { TablePaginationConfig } from 'ant-design-vue'
-import { Button, Table, type TableColumn, type TableView } from '@minitwiks/nsmp-vue-components'
+import { Button, Table, Alert, type TableColumn, type TableView } from '@minitwiks/nsmp-vue-components'
 import { notifyError, notifySuccess } from '../utils/notification'
 
 import AccessKeySpan from "./list-columns/AccessKeySpan.vue"
@@ -9,13 +9,20 @@ import AccessKeySwitch from "./list-columns/AccessKeySwitch.vue"
 import DeleteKey from "./list-columns/DeleteKeyButton.vue"
 import EditKey from "./list-columns/EditKeyButton.vue"
 
-import { LinkIcon, PrivacyIcon } from 'nsmp-icons'
+import { LinkIcon, PrivacyIcon, DeleteIcon, PlusIcon, FilterIcon } from 'nsmp-icons'
 
 import { SearchMode, IKeyInfo, IKeysList } from "../utils/types"
 import { formatSmartDate, criticalDeadline } from "../utils/services"
 import ConnectorService from "../utils/connector"
 import { useSearchStore } from "../stores/search"
 import { useUserStore } from "../stores/user"
+
+const emit = defineEmits<{
+  (e: 'showModal:CreateKey'): void
+  (e: 'showModal:DeleteAllKeys'): void
+  (e: 'showModal:Search'): void
+  (e: 'search:Reset'): void
+}>()
 
 const userStore = useUserStore()
 const searchStore = useSearchStore()
@@ -129,28 +136,52 @@ watch(() => searchStore.trigger, () => {
       <Button type="text" v-if="selected.length == 1">Подробная информация</Button>
     </template>
 
+    <template #start>
+      <Button type="default" :icon="PlusIcon" @click="emit('showModal:CreateKey')">Создать ключ</Button>
+      <Button type="default" :icon="FilterIcon" v-if="userStore?.superUser" @click="emit('showModal:Search')">Фильтрация</Button>
+      <Button type="default" :icon="DeleteIcon" @click="emit('showModal:DeleteAllKeys')">Удалить все ключи</Button>
+
+      <Alert :closable="false" :open="true" :showIcon="false" class="filter" v-if="searchStore.data">
+        <template #message>
+          <div>
+            <a-typography-link class="link" type="text" @click="emit('showModal:Search')">Изменить</a-typography-link>
+            <a-typography-link class="link" v-if="searchStore.data" type="text" @click="emit('search:Reset')">Сбросить</a-typography-link>
+            <a-typography-text>[{{ searchStore.mode == SearchMode.Login ? "Пользователь" : "Ключ" }}: {{ searchStore.data }}]</a-typography-text>
+          </div>
+        </template>
+      </Alert>
+    </template>
+
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'username'">
         <a-typography-link :href="getUrl(record.employeeUuid)" target="_blank">
           <LinkIcon class="icon icon-link"/>{{record.username}}
         </a-typography-link>
       </template>
-      <AccessKeySpan v-else-if="column.key === 'uuid'" :access-key="record as IKeyInfo" />
-      <a-tooltip v-else-if="column.key === 'description'" :title="record.description">
+
+      <AccessKeySpan v-if="column.key === 'uuid'" :access-key="record as IKeyInfo" />
+
+      <a-tooltip v-if="column.key === 'description'" :title="record.description">
         <a-typography-text :content="record.description" />
       </a-tooltip>
-      <span v-else-if="column.key === 'type'">{{ record.type === 'REUSABLE' ? 'Многоразовый' : 'Одноразовый' }}</span>
-      <AccessKeySwitch v-else-if="column.key === 'active'" :access-key="record as IKeyInfo" />
-      <a-tag v-else-if="column.key === 'creationDate'" color="cyan" class="date-tag">
+      
+      <span v-if="column.key === 'type'">{{ record.type === 'REUSABLE' ? 'Многоразовый' : 'Одноразовый' }}</span>
+
+      <AccessKeySwitch v-if="column.key === 'active'" :access-key="record as IKeyInfo" />
+
+      <a-tag v-if="column.key === 'creationDate'" color="cyan" class="date-tag">
         {{ formatSmartDate(record.creationDate) }}
       </a-tag>
-      <a-tag v-else-if="column.key === 'deadline'" :color="criticalDeadline(record.deadline) ? 'volcano' : 'green'" class="date-tag">
+
+      <a-tag v-if="column.key === 'deadline'" :color="criticalDeadline(record.deadline) ? 'volcano' : 'green'" class="date-tag">
         {{ formatSmartDate(record.deadline) }}
       </a-tag>
-      <a-tag v-else-if="column.key === 'lastUsageDate'" :color="record.lastUsageDate ? 'geekblue' : 'purple'" class="date-tag">
+
+      <a-tag v-if="column.key === 'lastUsageDate'" :color="record.lastUsageDate ? 'geekblue' : 'purple'" class="date-tag">
         {{ record.lastUsageDate ? formatSmartDate(record.lastUsageDate) : 'Никогда' }}
       </a-tag>
-      <template v-else-if="column.key === 'actions'">
+
+      <template v-if="column.key === 'actions'">
         <div class="actions">
           <a-popover>
             <template #content>
@@ -171,4 +202,7 @@ watch(() => searchStore.trigger, () => {
 .icon.icon-link { margin-bottom: -3px; }
 .svg { margin-bottom: -10px !important; }
 .actions { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.filter .link { margin-right: 10px; font-size: 12px !important;}
+.filter { margin-top: 10px; padding: 5px 14px !important;}
+.filter .link:nth-child(2) { padding-right: 7px; border-right: 1px solid rgba(0, 0, 0, .35); }
 </style>

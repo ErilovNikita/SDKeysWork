@@ -9,7 +9,7 @@ import {SearchMode} from './utils/types.ts'
 import ConnectorService from './utils/connector.ts'
 import {isDev} from './utils/connector.ts'
 
-import Header from './components/Header.vue'
+import Version from './components/Version.vue'
 import KeysList from './components/KeysList.vue'
 import MessageTemplate from './components/views/MessageTemplate.vue'
 
@@ -74,16 +74,15 @@ onMounted(async () => {
       <AccessKeyModal ref="keyInfoModalRef"/>
       <SearchModal ref="searchModalRef" @search="handleSearch" />
 
-      <Header 
-        @showModal:CreateKey="handleCreateKeyModalShow"
-        @showModal:DeleteAllKeys="handleDeleteKeysModalShow"
-        @showModal:Search="handleSearchModalShow"
-        @search:Reset="handleResetSearch"
-      />
+      <Version/>
 
       <KeysList 
         v-if="userStore.canUse"
         ref="keysListRef"
+        @showModal:CreateKey="handleCreateKeyModalShow"
+        @showModal:DeleteAllKeys="handleDeleteKeysModalShow"
+        @showModal:Search="handleSearchModalShow"
+        @search:Reset="handleResetSearch"
       />
 
       <MessageTemplate 

@@ -12,9 +12,18 @@ export const notify = (options: NotificationOptions) => openNotification({
 export const notifySuccess = (title: string, options: SuccessOptions = {}) =>
   notify({ title, type: 'success', ...options })
 
-export const notifyError = (title: string, error: unknown) =>
+export const notifyError = (title: string, error: unknown, options: SuccessOptions = {}) =>
   notify({
     title,
     description: error instanceof Error ? error.message : String(error),
     type: 'error',
+    ...options
+  })
+
+export const notifyWarning = (title: string, error: unknown, options: SuccessOptions = {}) =>
+  notify({
+    title,
+    description: error instanceof Error ? error.message : String(error),
+    type: 'warning',
+    ...options
   })
