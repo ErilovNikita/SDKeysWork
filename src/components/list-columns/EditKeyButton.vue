@@ -78,6 +78,7 @@ watch(open, visible => {
         />
       </Form>
     </template>
+    
     <template #footer>
       <Button type="primary" @click="submit">Сохранить</Button>
       <Button type="text" @click="open = false">Отмена</Button>

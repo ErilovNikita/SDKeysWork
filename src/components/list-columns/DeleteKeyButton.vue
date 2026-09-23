@@ -34,6 +34,7 @@ const remove = async (): Promise<void> => {
       <p>Вы действительно хотите удалить ключ "<code>{{ props.accessKey.uuid }}</code>"?</p>
       <p>Данные будут потеряны навсегда.</p>
     </template>
+    
     <template #footer>
       <Button type="primary" @click="remove">Удалить ключ</Button>
       <Button type="text" @click="open = false">Отмена</Button>
