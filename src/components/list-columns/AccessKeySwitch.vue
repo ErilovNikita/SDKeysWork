@@ -3,7 +3,7 @@ import {notification} from "ant-design-vue"
 
 import { IKeyInfo } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
-import { parseRuDate } from "../../utils/services"
+import { parseDate } from "../../utils/services"
 
 import ClockIcon from '../../assets/icons/clock.svg'
 import { computed } from "vue"
@@ -12,7 +12,7 @@ const props = defineProps<{accessKey: IKeyInfo}>()
 const api:ConnectorService = new ConnectorService()
 const usingEnvAccessKey:string | null = import.meta.env.VITE_ACCESS_KEY
 const keyExpired = computed(() => {
-  const date = parseRuDate(props.accessKey.deadline)
+  const date = parseDate(props.accessKey.deadline)
   if (!date) return false
   return date.getTime() <= Date.now()
 })

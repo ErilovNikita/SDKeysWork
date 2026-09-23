@@ -1,5 +1,12 @@
-export const parseRuDate = (value: string): Date | null => {
-  const match = value.match(
+export const parseDate = (value: string | number): Date | null => {
+  // Timestamp
+  if (/^\d+$/.test(value.toString())) {
+    const date = new Date(Number(value))
+    return isNaN(date.getTime()) ? null : date
+  }
+
+  // Формат DD.MM.YYYY HH:mm
+  const match = value.toString().match(
     /^(\d{2})\.(\d{2})\.(\d{4})\s+(\d{2}):(\d{2})$/
   )
 
@@ -7,20 +14,26 @@ export const parseRuDate = (value: string): Date | null => {
 
   const [, day, month, year, hour, minute] = match
 
-  return new Date(
+  const date = new Date(
     Number(year),
     Number(month) - 1,
     Number(day),
     Number(hour),
     Number(minute)
   )
+
+  return isNaN(date.getTime()) ? null : date
 }
 
-export const formatSmartDate = (value?: string | Date | null): string => {
-  if (!value) return 'Не указано'
+export const formatSmartDate = (
+  value?: string | number | Date | null
+): string => {
+  if (value == null) return 'Не указано'
 
-  let date: Date | null = value instanceof Date ? value : parseRuDate(value)
+  const date = value instanceof Date ? value : parseDate(value)
+
   if (!date || isNaN(date.getTime())) return 'Не указано'
+
   const now = new Date()
 
   const startOfToday = new Date(
@@ -35,7 +48,10 @@ export const formatSmartDate = (value?: string | Date | null): string => {
     date.getDate()
   )
 
-  const diffDays = Math.round((startOfTarget.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24))
+  const diffDays = Math.round(
+    (startOfTarget.getTime() - startOfToday.getTime()) /
+      (1000 * 60 * 60 * 24)
+  )
 
   const time = date.toLocaleTimeString('ru-RU', {
     hour: '2-digit',
@@ -58,7 +74,7 @@ export const formatSmartDate = (value?: string | Date | null): string => {
 export const criticalDeadline = (value?: string | null): boolean => {
   if (!value) return false
 
-  const date = parseRuDate(value)
+  const date = parseDate(value)
   if (!date || isNaN(date.getTime())) return false
 
   const now = new Date()
