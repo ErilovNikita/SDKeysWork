@@ -8,9 +8,9 @@ const props = defineProps<{
 
 <template>
     <a-space direction="vertical" class="text-center">
-        <div class="magic" v-if="emoji">{{ emoji }}</div>
-        <a-typography-title :level="3" class="header" v-if="header">{{ header }}</a-typography-title>
-        <a-typography-text disabled class="description" v-if="description"> {{ description }}</a-typography-text>
+        <div class="magic" v-if="props.emoji">{{ props.emoji }}</div>
+        <a-typography-title :level="3" class="header" v-if="props.header">{{ props.header }}</a-typography-title>
+        <a-typography-text disabled class="description" v-if="props.description"> {{ props.description }}</a-typography-text>
         <slot name="end"></slot>
     </a-space>
 </template>

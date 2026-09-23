@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
-    "build": "vite build",
-    "preview": "vite preview",
-    "buildAndSend": "vite build"
+    "build": "vue-tsc -b && vite build",
+    "deploy": "node scripts/deploy.js",
+    "release": "npm run build && npm run deploy"
   },
   "dependencies": {
     "@highlightjs/vue-plugin": "^2.1.0",
