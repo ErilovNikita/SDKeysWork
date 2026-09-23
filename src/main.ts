@@ -29,7 +29,7 @@ const mock: PartialJsApi = {
             const hideAccessKeys =
                 typeof raw === 'string'
                 ? ['1', 'true', 'yes', 'on'].includes(raw.toLowerCase())
-                : false; // если переменной нет – считаем false
+                : false;
 
             return { hideAccessKeys };
         },

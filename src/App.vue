@@ -67,6 +67,7 @@ onMounted(async () => {
         @showModal:CreateKey="modals.create = true"
         @showModal:DeleteAllKeys="modals.delete = true"
         @showModal:Search="modals.search = true"
+        @showModal:AccessKeyInfo="searchStore.setSearchData"
       />
 
       <MessageTemplate 

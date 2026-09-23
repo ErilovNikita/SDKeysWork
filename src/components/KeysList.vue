@@ -21,6 +21,7 @@ const emit = defineEmits<{
   (e: 'showModal:CreateKey'): void
   (e: 'showModal:DeleteAllKeys'): void
   (e: 'showModal:Search'): void
+  (e: 'showModal:AccessKeyInfo', value: string): void
 }>()
 
 const userStore = useUserStore()
@@ -75,6 +76,12 @@ const handlePaginationChange = (current: number, pageSize: number) => {
   pagination.value.current = current
   pagination.value.pageSize = pageSize
   getPage()
+}
+
+const showAccessKeyInfo = (accessKey: string) => {
+  searchStore.mode = SearchMode.UUID
+  searchStore.data = accessKey
+  emit('showModal:AccessKeyInfo', accessKey)
 }
 
 pagination.value.onChange = handlePaginationChange
@@ -136,7 +143,7 @@ watch(() => searchStore.trigger, () => {
     :selectable="true"
   >
     <template #selectedObjectsActions>
-      <Button type="text" v-if="selected.length == 1">Подробная информация</Button>
+      <Button type="text" v-if="selected.length == 1" @click="showAccessKeyInfo(selected[0].uuid)">Подробная информация</Button>
     </template>
 
     <template #start>
