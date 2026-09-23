@@ -5,12 +5,14 @@ import { notifyError, notifySuccess } from '../../utils/notification'
 
 import ConnectorService from '../../utils/connector'
 import { useUserStore } from '../../stores/user'
+import { useSearchStore } from "../../stores/search"
 
 type Confirmation = number | null
 type ConfirmItem = { options: { label: string; value: number }[] }
 type DeleteKeysForm = { localLogin: string | null; confirmations: Confirmation[] }
 
 const userStore = useUserStore()
+const searchStore = useSearchStore()
 const api: ConnectorService = new ConnectorService()
 const formRef = ref<{ validate: () => Promise<unknown> }>()
 const confirmationsMeta = ref<ConfirmItem[]>([])
@@ -60,7 +62,8 @@ watch(open, visible => { if (visible) generateConfirmations() })
 const deleteAllKeys = async (): Promise<void> => {
   try {
     await api.deleteUserAccessKeys(model.localLogin!)
-    notifySuccess('Все удалено')
+    notifySuccess('Успешно удалено', {description: `Все ключи пользователя "${model.localLogin}" успешно удалены.`})
+    searchStore.trigger++
   } catch (error) {
     notifyError('Произошла ошибка', error)
     throw error
