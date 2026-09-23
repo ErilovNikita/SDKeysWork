@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ConfigProvider } from '@minitwiks/nsmp-vue-components'
-import { onMounted, reactive, ref } from 'vue'
+import { parseNsmpTheme } from '@minitwiks/nsmp-vue-components/utils'
+import type { NsmpThemeProperties } from '@minitwiks/nsmp-vue-components/utils'
+import { getCurrentUserTheme } from './utils/theme'
+import { getThemeConfigurationByCode } from './utils/theme'
+
+import { onMounted, reactive, ref, shallowRef } from 'vue'
 
 import {useSearchStore} from './stores/search.ts'
 import {useUserStore} from './stores/user.ts'
@@ -26,8 +31,17 @@ const modals = reactive({
   keyInfo: false, 
   search: false 
 })
+const nsmpTheme = shallowRef<NsmpThemeProperties>()
 
 onMounted(async () => {
+  try{
+    const themeCode = await getCurrentUserTheme(jsApi.getCurrentUser().uuid)
+    const themeConfiguration = await getThemeConfigurationByCode(themeCode)
+    nsmpTheme.value = parseNsmpTheme(themeConfiguration)
+  } catch(e) {
+    console.error('Ошибка при получении темы пользователя:', e)
+  }
+
   try {
     const data: IUser = await new ConnectorService().getUserData()
     userStore.setUser(data)
@@ -38,7 +52,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <ConfigProvider>
+  <ConfigProvider :nsmp-theme="nsmpTheme">
     <div v-if="appReady" style="background-color: white;">
       <StatesModal v-if="isDev()"/>
       <CreateKeyModal v-model:open="modals.create"/>
