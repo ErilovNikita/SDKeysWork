@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue"
-import { Button } from '@minitwiks/nsmp-vue-components'
+import type { TablePaginationConfig } from 'ant-design-vue'
+import { Button, Table, type TableColumn, type TableView } from '@minitwiks/nsmp-vue-components'
 import { notifyError, notifySuccess } from '../utils/notification'
 
 import AccessKeySpan from "./list-columns/AccessKeySpan.vue"
@@ -10,7 +11,7 @@ import EditKey from "./list-columns/EditKeyButton.vue"
 
 import { LinkIcon, PrivacyIcon } from 'nsmp-icons'
 
-import { SearchMode, IKeyInfo, IKeysList, IPagination } from "../utils/types"
+import { SearchMode, IKeyInfo, IKeysList } from "../utils/types"
 import { formatSmartDate, criticalDeadline } from "../utils/services"
 import ConnectorService from "../utils/connector"
 import { useSearchStore } from "../stores/search"
@@ -20,7 +21,7 @@ const userStore = useUserStore()
 const searchStore = useSearchStore()
 const api: ConnectorService = new ConnectorService()
 
-const pagination = ref<IPagination>({
+const pagination = ref<TablePaginationConfig>({
   position: ['bottomLeft'],
   current: 1,
   pageSize: 10,
@@ -33,23 +34,54 @@ const pagination = ref<IPagination>({
   showQuickJumper: true
 })
 
+const tableColumns: Record<string, TableColumn[]> = {
+  full: [
+    { title: 'Пользователь', dataIndex: 'username', key: 'username', width: 230 },
+    { title: 'Значение ключа', dataIndex: 'uuid', key: 'uuid', width: 320 },
+    { title: 'Описание', dataIndex: 'description', key: 'description' },
+    { title: 'Тип', dataIndex: 'type', key: 'type' },
+    { title: 'Активен', dataIndex: 'active', key: 'active', align: 'center', width: 100 },
+    { title: 'Дата создания', dataIndex: 'creationDate', key: 'creationDate', width: 150 },
+    { title: 'Дедлайн', dataIndex: 'deadline', key: 'deadline', width: 150 },
+    { title: 'Последнее использование', dataIndex: 'lastUsageDate', key: 'lastUsageDate', width: 150 },
+    { title: 'Активности', key: 'actions', align: 'center', resizable: false, width: 150 },
+  ],
+  short: [
+    { title: 'Пользователь', dataIndex: 'username', key: 'username', width: 230 },
+    { title: 'Значение ключа', dataIndex: 'uuid', key: 'uuid', width: 320 },
+    { title: 'Описание', dataIndex: 'description', key: 'description' },
+    { title: 'Активен', dataIndex: 'active', key: 'active', align: 'center', width: 100 },
+    { title: 'Дедлайн', dataIndex: 'deadline', key: 'deadline', width: 150 },
+    { title: 'Активности', key: 'actions', align: 'center', resizable: false, width: 150 },
+  ],
+}
+
+const views: TableView[] = [
+  { title: 'Основной вид', columns: tableColumns.short },
+  { title: 'Вся информация', columns: tableColumns.full },
+]
+
 const elements = ref<IKeyInfo[]>([])
 const loading = ref<boolean>(false)
+const selected = ref<IKeyInfo[]>([])
 
-const handleTableChange = (newPagination: IPagination) => {
-  Object.assign(pagination.value, newPagination)
+const handlePaginationChange = (current: number, pageSize: number) => {
+  pagination.value.current = current
+  pagination.value.pageSize = pageSize
   getPage()
 }
+
+pagination.value.onChange = handlePaginationChange
 
 const getPage = (type:'all'|'user' = 'all') =>  {
   loading.value = true
   let promise: Promise<IKeysList>
 
   if (userStore.superUser == false && userStore.canUse == true) {
-    promise = api.getAccessKeysPage(pagination.value.current, pagination.value.pageSize, userStore.login!)
+    promise = api.getAccessKeysPage(pagination.value.current ?? 1, pagination.value.pageSize ?? 10, userStore.login!)
   } else {
-    if (type == 'user') promise = api.getAccessKeysPage(pagination.value.current, pagination.value.pageSize, searchStore.data!)
-    else promise = api.getAccessKeysPage(pagination.value.current, pagination.value.pageSize)
+    if (type == 'user') promise = api.getAccessKeysPage(pagination.value.current ?? 1, pagination.value.pageSize ?? 10, searchStore.data!)
+    else promise = api.getAccessKeysPage(pagination.value.current ?? 1, pagination.value.pageSize ?? 10)
   }
 
   promise.then((data: IKeysList) => {
@@ -80,79 +112,63 @@ watch(() => searchStore.trigger, () => {
 </script>
 
 <template>
-  <a-table class="table" :selections="true" :data-source="elements" :pagination="pagination" :loading="loading"
-    :scroll="{ x: 1000 }" @change="handleTableChange">
-    <a-table-column title="Пользователь" data-index="username" key="username" :custom-header-cell="() => ({ style: { minWidth: '240px' } })">
-      <template #customRender="{ record }">
+  <Table
+    :columns="tableColumns.short"
+    v-model:selected-objects="selected"
+    :data-source="elements"
+    :loading="loading"
+    :pagination="pagination"
+    row-key="uuid"
+    view-storage-key="keys"
+    show-view-select
+    :views="views"
+    :scroll="{ x: 1000 }"
+    :selectable="true"
+  >
+    <template #selectedObjectsActions>
+      <Button type="text" v-if="selected.length == 1">Подробная информация</Button>
+    </template>
+
+    <template #bodyCell="{ column, record }">
+      <template v-if="column.key === 'username'">
         <a-typography-link :href="getUrl(record.employeeUuid)" target="_blank">
           <LinkIcon class="icon icon-link"/>{{record.username}}
         </a-typography-link>
       </template>
-    </a-table-column>
-    <a-table-column title="Значение ключа" data-index="uuid" key="uuid" :custom-header-cell="() => ({ style: { minWidth: '350px' } })">
-      <template #customRender="{ record }">
-        <AccessKeySpan :access-key="record" />
-      </template>
-    </a-table-column>
-    <a-table-column title="Описание" data-index="description" key="description" :custom-header-cell="() => ({ style: { minWidth: '200px' } })">
-      <template #customRender="{ record }">
+      <AccessKeySpan v-else-if="column.key === 'uuid'" :access-key="record as IKeyInfo" />
+      <a-tooltip v-else-if="column.key === 'description'" :title="record.description">
         <a-typography-text :content="record.description" />
+      </a-tooltip>
+      <span v-else-if="column.key === 'type'">{{ record.type === 'REUSABLE' ? 'Многоразовый' : 'Одноразовый' }}</span>
+      <AccessKeySwitch v-else-if="column.key === 'active'" :access-key="record as IKeyInfo" />
+      <a-tag v-else-if="column.key === 'creationDate'" color="cyan" class="date-tag">
+        {{ formatSmartDate(record.creationDate) }}
+      </a-tag>
+      <a-tag v-else-if="column.key === 'deadline'" :color="criticalDeadline(record.deadline) ? 'volcano' : 'green'" class="date-tag">
+        {{ formatSmartDate(record.deadline) }}
+      </a-tag>
+      <a-tag v-else-if="column.key === 'lastUsageDate'" :color="record.lastUsageDate ? 'geekblue' : 'purple'" class="date-tag">
+        {{ record.lastUsageDate ? formatSmartDate(record.lastUsageDate) : 'Никогда' }}
+      </a-tag>
+      <template v-else-if="column.key === 'actions'">
+        <div class="actions">
+          <a-popover>
+            <template #content>
+              <highlightjs style="margin-top: 0px;" language="json" :code="JSON.stringify(record, null, 4)" />
+            </template>
+            <Button type="text" class="icon" shape="circle" :icon="PrivacyIcon" />
+          </a-popover>
+          <EditKey :access-key="record as IKeyInfo" />
+          <DeleteKey :access-key="record as IKeyInfo" />
+        </div>
       </template>
-    </a-table-column>
-    <a-table-column title="Тип" data-index="type" key="type">
-      <template #customRender="{ record }">
-        <span>{{ record.type == 'REUSABLE' ? "Многоразовый" : "Одноразовый" }}</span>
-      </template>
-    </a-table-column>
-    <a-table-column title="Активен" data-index="active" key="active" align="center">
-      <template #customRender="{ record }">
-        <AccessKeySwitch :access-key="record" />
-      </template>
-    </a-table-column>
-    <a-table-column title="Дата создания" data-index="creationDate" key="creationDate">
-      <template #customRender="{ record }">
-        <a-tag color="cyan" class="date-tag">
-          {{ formatSmartDate(record.creationDate) }}
-        </a-tag>
-      </template>
-    </a-table-column>
-    <a-table-column title="Дедлайн" data-index="deadline" key="deadline">
-      <template #customRender="{ record }">
-        <a-tag :color="criticalDeadline(record.deadline) ? 'volcano' : 'green'" class="date-tag">
-          {{ formatSmartDate(record.deadline) }}
-        </a-tag>
-      </template>
-    </a-table-column>
-    <a-table-column title="Последнее использование" data-index="lastUsageDate" key="lastUsageDate">
-      <template #customRender="{ record }">
-        <a-tag :color="record.lastUsageDate ? 'geekblue' : 'purple'" class="date-tag">
-          {{ record.lastUsageDate ? formatSmartDate(record.lastUsageDate) : "Никогда" }}
-        </a-tag>
-      </template>
-    </a-table-column>
-    <a-table-column title="" data-index="delete" key="delete" align="center">
-      <template #customRender="{ record }">
-        <a-popover>
-          <template #content>
-            <highlightjs style="margin-top: 0px;" language='json' :code="JSON.stringify(record, null, 4)" />
-          </template>
-          <Button
-            type="text"
-            class="icon"
-            shape="circle"
-            :icon="PrivacyIcon"
-          />
-        </a-popover>
-        <EditKey :access-key="record"/>
-        <DeleteKey :access-key="record"/>
-      </template>
-    </a-table-column>
-  </a-table>
-
+    </template>
+  </Table>
 </template>
 
 <style scoped>
 .date-tag { font-size: 11px !important; }
 .icon.icon-link { margin-bottom: -3px; }
 .svg { margin-bottom: -10px !important; }
+.actions { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 </style>

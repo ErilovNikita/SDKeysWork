@@ -6,7 +6,7 @@ import type { IKeyInfo } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
 import { parseDate } from "../../utils/services"
 
-import { ClockIcon } from 'nsmp-icons/vue'
+import { ClockIcon } from 'nsmp-icons'
 import { computed } from "vue"
 
 const props = defineProps<{accessKey: IKeyInfo}>()
