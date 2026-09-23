@@ -31,21 +31,22 @@ onBeforeUnmount(() => clearTimeout(resetCopiedTimer))
 <template>
   <a-space direction="horizontal">
     <a-tooltip v-model:open="tooltipOpen" :title="copied ? 'Скопировано!' : 'Скопировать'" class="uuid-text" placement="top">
-      <a-skeleton-button 
-        :active="isMac"
-        shape="round" 
-        class="key-skeleton"
-        v-if="!showText"
-        @click="handleClick"
-      />
+      <span class="uuid-trigger">
+        <a-skeleton-button 
+          v-if="!showText"
+          :active="isMac"
+          shape="round" 
+          class="key-skeleton"
+          @click="handleClick"
+        />
+        <a-typography-text 
+          v-else
+          class="uuid-text"
+          :content="accessKey.uuid"
+          @click="showText = false"
+        />
+      </span>
     </a-tooltip>
-
-      <a-typography-text 
-        v-if="showText"
-        class="uuid-text"
-        :content="accessKey.uuid"
-        @click="showText = false"
-      />
   </a-space>
 </template>
 
@@ -53,5 +54,10 @@ onBeforeUnmount(() => clearTimeout(resetCopiedTimer))
 .uuid-text {
   font-family: monospace;
   cursor: pointer;
+}
+.uuid-trigger {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
 }
 </style>
