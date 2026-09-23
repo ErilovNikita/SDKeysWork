@@ -1,12 +1,9 @@
 import {createApp} from 'vue'
-import {
-    createInitVariableFromEnv,
-    initializeJsApi,
-    initVariableEnvMapping
-} from '@minitwiks/js-api'
+import { createInitVariableFromEnv, initializeJsApi, initVariableEnvMapping } from '@minitwiks/js-api'
 import {createPinia} from 'pinia'
 import App from './App.vue'
 import Antd from 'ant-design-vue'
+import { NsmpVueComponents } from '@minitwiks/nsmp-vue-components'
 import '@iframe-resizer/child'
 import hljs from 'highlight.js/lib/core'
 import json from 'highlight.js/lib/languages/json'
@@ -31,6 +28,7 @@ initializeJsApi({}, params).then((JsApi: any) => {
 
     app.provide("jsApi", JsApi)
     app.use(Antd)
+    app.use(NsmpVueComponents)
     app.use(pinia)
     app.use(hljsVuePlugin)
     app.mount('#app')
