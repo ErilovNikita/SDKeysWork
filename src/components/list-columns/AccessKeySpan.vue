@@ -1,27 +1,36 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { onBeforeUnmount, ref } from "vue"
 import { IKeyInfo } from "../../utils/types"
 import { usePlatform } from '../../composables/usePlatform'
 
 const { isMac } = usePlatform()
 const props = defineProps<{ accessKey: IKeyInfo }>()
 const showText = ref(false)
-const tooltipTitle = ref<string>("Скопировать")
+const copied = ref(false)
+const tooltipOpen = ref(false)
+let resetCopiedTimer: ReturnType<typeof setTimeout> | undefined
 
-const copy = () => {
+const copy = async () => {
   navigator.clipboard.writeText(props.accessKey.uuid)
-  tooltipTitle.value = "Скопировано!"
-  setTimeout(() => (tooltipTitle.value = "Скопировать"), 2000)
+  copied.value = true
+  tooltipOpen.value = true
+  clearTimeout(resetCopiedTimer)
+  resetCopiedTimer = setTimeout(() => {
+    copied.value = false
+    tooltipOpen.value = false
+  }, 1500)
 }
 const handleClick = () => {
   copy()
   showText.value = true
 }
+
+onBeforeUnmount(() => clearTimeout(resetCopiedTimer))
 </script>
 
 <template>
   <a-space direction="horizontal">
-    <a-tooltip :title="tooltipTitle" class="uuid-text" :trigger="['hover']" placement="top">
+    <a-tooltip v-model:open="tooltipOpen" :title="copied ? 'Скопировано!' : 'Скопировать'" class="uuid-text" placement="top">
       <a-skeleton-button 
         :active="isMac"
         shape="round" 
