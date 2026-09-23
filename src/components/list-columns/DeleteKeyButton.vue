@@ -1,71 +1,51 @@
 <script setup lang="ts">
-import { notification } from "ant-design-vue"
-import { h } from "vue"
+import { Button, Modal } from '@minitwiks/nsmp-vue-components'
+import { notifyError, notifySuccess } from '../../utils/notification'
+import { h, ref } from 'vue'
+import { DeleteIcon } from 'nsmp-icons'
 
-import Modal from "../naumen/Modal.vue"
-import DeleteIcon from '../../assets/icons/delete.svg'
-
-import { IKeyInfo } from "../../utils/types"
+import type { IKeyInfo } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
-import { ModalController } from "../../utils/fileds"
 import { useSearchStore } from "../../stores/search"
 
 const props = defineProps<{ accessKey: IKeyInfo }>()
-const usingEnvAccessKey:string | null = import.meta.env.VITE_ACCESS_KEY
+const usingEnvAccessKey: string | null = import.meta.env.VITE_ACCESS_KEY
 const searchStore = useSearchStore()
-const controller = new ModalController("Вы уверены?")
 const api: ConnectorService = new ConnectorService()
+const open = ref(false)
+const modalTitle = h('span', { style: 'display: block; text-align: left' }, 'Вы уверены?')
 
-const yes = () => {
-  api.deleteKey(props.accessKey.uuid)
-    .then(() => {
-      notification.success({
-        message: "Ключ успешно удален",
-        placement: 'bottomRight',
-        duration: 5
-      })
-      searchStore.setSearchData(searchStore.data!)
-    })
-    .catch((e:any) => {
-      notification.error({
-        message: "При удалении произошла ошибка",
-        description: JSON.parse(e).cause.message,
-        placement: 'bottomRight',
-        duration: 5
-      })
-    })
-    .finally(() => {
-      controller.hidden()
-    })
+const remove = async (): Promise<void> => {
+  try {
+    await api.deleteKey(props.accessKey.uuid)
+    notifySuccess('Ключ успешно удален')
+    searchStore.setSearchData(searchStore.data!)
+    open.value = false
+  } catch (error) {
+    notifyError('При удалении произошла ошибка', error)
+  }
 }
-
 </script>
 
 
 <template>
-  <Modal :controller="controller">
+  <Modal v-model:open="open" :title="modalTitle" :body-style="{ textAlign: 'left' }">
     <template #form>
       <p>Вы действительно хотите удалить ключ "<code>{{ props.accessKey.uuid }}</code>"?</p>
       <p>Данные будут потеряны навсегда.</p>
     </template>
     <template #footer>
-      <a-button type="primary" @click="yes">Удалить ключ</a-button>
-      <a-button type="text" @click="controller.hidden()">Отмена</a-button>
+      <Button type="primary" @click="remove">Удалить ключ</Button>
+      <Button type="text" @click="open = false">Отмена</Button>
     </template>
   </Modal>
 
-  <a-button 
+  <Button
     type="text"
     class="icon"
     shape="circle"
-    @click="controller.show()"
-    :icon="h(DeleteIcon)"
+    @click="open = true"
+    :icon="DeleteIcon"
     v-if="props.accessKey.uuid != usingEnvAccessKey"
   />
 </template>
-
-<style scoped>
-.text {
-  margin-bottom: 20px;
-}
-</style>

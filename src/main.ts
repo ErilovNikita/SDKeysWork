@@ -10,6 +10,7 @@ import json from 'highlight.js/lib/languages/json'
 import hljsVuePlugin from "@highlightjs/vue-plugin"
 
 import 'highlight.js/styles/lightfair.css'
+import '@minitwiks/nsmp-vue-components/style.css'
 import './assets/styles/index.css'
 
 const mapping = {

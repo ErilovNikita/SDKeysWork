@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { h, onMounted, ref, watch } from "vue"
-import { notification } from 'ant-design-vue'
+import { onMounted, ref, watch } from "vue"
+import { Button } from '@minitwiks/nsmp-vue-components'
+import { notifyError, notifySuccess } from '../utils/notification'
 
 import AccessKeySpan from "./list-columns/AccessKeySpan.vue"
 import AccessKeySwitch from "./list-columns/AccessKeySwitch.vue"
 import DeleteKey from "./list-columns/DeleteKeyButton.vue"
 import EditKey from "./list-columns/EditKeyButton.vue"
 
-import LinkIcon from '../assets/icons/link.svg'
-import PrivacyIcon from '../assets/icons/privacy.svg'
+import { LinkIcon, PrivacyIcon } from 'nsmp-icons'
 
 import { SearchMode, IKeyInfo, IKeysList, IPagination } from "../utils/types"
 import { formatSmartDate, criticalDeadline } from "../utils/services"
@@ -57,20 +57,12 @@ const getPage = (type:'all'|'user' = 'all') =>  {
     elements.value.length = 0
     elements.value.push(...data.data)    
     if (type == 'user') {
-      notification.success({
-        message: "Запрос выполнен",
+      notifySuccess('Запрос выполнен', {
         description: elements.value.length ? `Получено ключей ${elements.value.length} шт.` : `Ключей не найдено`,
-        placement: 'bottomRight',
-        duration: 5
       })
     } else searchStore.reset()
   }).catch((e:any) => {
-    notification.error({
-      message: "Ошибка при загрузке списка",
-      description: e.message,
-      placement: 'bottomRight',
-      duration: 5
-    })
+    notifyError('Ошибка при загрузке списка', e)
     searchStore.reset()
   }).finally(() => loading.value = false)
 }
@@ -144,11 +136,11 @@ watch(() => searchStore.trigger, () => {
           <template #content>
             <highlightjs style="margin-top: 0px;" language='json' :code="JSON.stringify(record, null, 4)" />
           </template>
-          <a-button 
+          <Button
             type="text"
             class="icon"
             shape="circle"
-            :icon="h(PrivacyIcon)"
+            :icon="PrivacyIcon"
           />
         </a-popover>
         <EditKey :access-key="record"/>

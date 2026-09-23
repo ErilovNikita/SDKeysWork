@@ -59,3 +59,11 @@ a:hover {
 .icon svg {
     margin-top: 2px !important;
 }
+
+.confirmation,
+.confirmation .ant-radio-group {
+  width: 100% !important;
+}
+.confirmation .ant-radio-button-wrapper {
+  width: 50% !important;
+}

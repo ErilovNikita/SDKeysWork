@@ -1,110 +1,95 @@
 <script setup lang="ts">
-import { notification } from "ant-design-vue"
 import { h, reactive, ref, watch } from "vue"
+import { Button, Form, FormDate, FormInput, Modal } from '@minitwiks/nsmp-vue-components'
+import { notifyError, notifySuccess } from '../../utils/notification'
+import { EditIcon } from 'nsmp-icons'
 
-import Modal from "../naumen/Modal.vue"
-import EditIcon from '../../assets/icons/edit.svg'
-
-import { IKeyInfo, IEditKeyForm } from "../../utils/types"
+import type { IKeyInfo, IEditKeyForm } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
-import { AlertFiledObject, ModalController } from "../../utils/fileds"
+import { parseDate } from '../../utils/services'
 import { useSearchStore } from "../../stores/search"
 
 const searchStore = useSearchStore()
 const props = defineProps<{ accessKey: IKeyInfo }>()
-const usingEnvAccessKey:string | null = import.meta.env.VITE_ACCESS_KEY
+const usingEnvAccessKey: string | null = import.meta.env.VITE_ACCESS_KEY
+
+const formRef = ref<{ validate: () => Promise<unknown> }>()
+const api: ConnectorService = new ConnectorService()
+const open = ref(false)
+const dateFormat = 'DD.MM.YYYY HH:mm'
+const modalTitle = h('span', { style: 'display: block; text-align: left' }, 'Вы уверены?')
+
+const formatDeadline = (value: string): string => {
+  const date = parseDate(value) ?? new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const pad = (part: number) => String(part).padStart(2, '0')
+  return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
 
 const model = reactive<IEditKeyForm>({
-  deadline: props.accessKey.deadline,
+  deadline: formatDeadline(props.accessKey.deadline),
   description: props.accessKey.description,
 })
 
-const formRef = ref()
-const controller = new ModalController("Вы уверены?")
-const descriptionAlertController = new AlertFiledObject(false, 'info', true, "Для чего используется ключ").show()
-const api: ConnectorService = new ConnectorService()
-const dateFormat = ref<string>('DD.MM.YYYY HH:mm')
-
-const yes = async () => {
+const submit = async (): Promise<void> => {
   try {
-    await formRef.value.validate()
-    api.editAccessKey(props.accessKey.uuid, model.description, model.deadline)
-      .then(() => {
-        notification.success({
-          message: "Ключ успешно изменен",
-          placement: 'bottomRight',
-          duration: 5
-        })
-        searchStore.setSearchData(searchStore.data!)
-      })
-      .catch((e:any) => {
-        notification.error({
-          message: "При изменении произошла ошибка",
-          description: JSON.parse(e).cause.message,
-          placement: 'bottomRight',
-          duration: 5
-        })
-      })
-      .finally(() => {
-        controller.hidden()
-      })
-  } catch { }
+    await formRef.value?.validate()
+  } catch {
+    return
+  }
+
+  try {
+    await api.editAccessKey(props.accessKey.uuid, model.description, model.deadline)
+    notifySuccess('Ключ успешно изменен')
+    searchStore.setSearchData(searchStore.data!)
+    open.value = false
+  } catch (error) {
+    notifyError('При изменении произошла ошибка', error)
+  }
 }
 
-watch(
-  () => controller.visiable.value,
-  (visible) => {
-    if (visible) {
-      model.deadline = props.accessKey.deadline
-      model.description = props.accessKey.description
-    }
-  }
-)
+watch(open, visible => {
+  if (visible) Object.assign(model, {
+    deadline: formatDeadline(props.accessKey.deadline),
+    description: props.accessKey.description,
+  })
+})
 
 </script>
 
 
 <template>
-  <Modal :controller="controller">
+  <Modal v-model:open="open" :title="modalTitle" :body-style="{ textAlign: 'left' }">
     <template #form>
-      <a-form ref="formRef" :model="model" class="main-container" layout="vertical">
-        <a-form-item name="deadline" :rules="[{ required: true, message: 'Обязатетельно к заполнению' }]" label="Дедлайн">
-          <a-date-picker class="field" v-model:value="model.deadline" :format="dateFormat" :value-format="dateFormat"
-            placeholder=" " />
-        </a-form-item>
-        <a-form-item name="description" :rules="[{ required: true, message: 'Обязатетельно к заполнению' }]" label="Описание">
-          <a-alert v-if="descriptionAlertController.visiable.value" :type="descriptionAlertController.type.value"
-            :closable="descriptionAlertController.closable.value"
-            :show-icon="descriptionAlertController.showIcon.value">
-            <template #message>
-              {{ descriptionAlertController.message.value }}
-            </template>
-          </a-alert>
-          <a-input placeholder="" class="field" v-model:value="model.description" />
-        </a-form-item>
-      </a-form>
+      <Form ref="formRef" :model="model">
+        <FormDate
+          name="deadline"
+          label="Дедлайн"
+          type="datetime"
+          :date-picker-props="{ format: dateFormat, valueFormat: dateFormat }"
+          :rules="[{ required: true, message: 'Обязательно к заполнению' }]"
+        />
+        <FormInput
+          name="description"
+          label="Описание"
+          description="Для чего используется ключ"
+          :rules="[{ required: true, message: 'Обязательно к заполнению' }]"
+        />
+      </Form>
     </template>
     <template #footer>
-      <a-button type="primary" @click="yes">Сохранить</a-button>
-      <a-button type="text" @click="controller.hidden()">Отмена</a-button>
+      <Button type="primary" @click="submit">Сохранить</Button>
+      <Button type="text" @click="open = false">Отмена</Button>
     </template>
   </Modal>
 
-  <a-button 
-    type="text" 
-    class="icon" 
-    shape="circle" 
-    @click="controller.show()" 
-    :icon="h(EditIcon)"
+  <Button
+    type="text"
+    class="icon"
+    shape="circle"
+    @click="open = true"
+    :icon="EditIcon"
     v-if="props.accessKey.uuid != usingEnvAccessKey"
   />
 </template>
-
-<style scoped>
-.text {
-  margin-bottom: 20px;
-}
-.field {
-  margin-bottom: 10px;
-}
-</style>

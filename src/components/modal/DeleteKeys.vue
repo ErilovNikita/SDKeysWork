@@ -1,24 +1,31 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
-import { notification } from "ant-design-vue"
-
-import Modal from '../../components/naumen/Modal.vue'
+import { Button, Form, FormInput, FormSelect, Modal } from '@minitwiks/nsmp-vue-components'
+import { notifyError, notifySuccess } from '../../utils/notification'
 
 import ConnectorService from '../../utils/connector'
 import { useUserStore } from '../../stores/user'
-import { ModalController } from '../../utils/fileds.ts'
 
-type ConfirmItem = { options: { label: string; value: boolean }[] }
-const controller = new ModalController("Создать ключ")
+type Confirmation = number | null
+type ConfirmItem = { options: { label: string; value: number }[] }
+type DeleteKeysForm = { localLogin: string | null; confirmations: Confirmation[] }
+
 const userStore = useUserStore()
 const api: ConnectorService = new ConnectorService()
-const formRef = ref()
+const formRef = ref<{ validate: () => Promise<unknown> }>()
 const confirmationsMeta = ref<ConfirmItem[]>([])
+const open = ref(false)
 
-const model = reactive<any>({
+const model = reactive<DeleteKeysForm>({
   localLogin: userStore.login,
   confirmations: []
 })
+
+const confirmationRules = [{
+  validator: async (_: unknown, value: Confirmation) => {
+    if (value !== 1) throw new Error('Необходимо выбрать «Да»')
+  }
+}]
 
 const shuffle = <T>(array: T[]): T[] =>  {
   const arr = [...array]
@@ -31,12 +38,12 @@ const shuffle = <T>(array: T[]): T[] =>  {
 
 const generateConfirmations = (count = 5) => {
   const baseOptions = [
-    { label: 'Да', value: true },
-    { label: 'Нет', value: false }
+    { label: 'Да', value: 1 },
+    { label: 'Нет', value: 0 }
   ]
 
   const meta: ConfirmItem[] = []
-  const values: (boolean | null)[] = []
+  const values: Confirmation[] = []
 
   for (let i = 0; i < count; i++) {
     const options = shuffle(baseOptions)
@@ -48,84 +55,59 @@ const generateConfirmations = (count = 5) => {
   model.confirmations = values
 }
 
-defineExpose({ controller })
+defineExpose({ open })
 
-watch(
-  () => controller.visiable.value,
-  (visible) => { if (visible) generateConfirmations() }
-)
+watch(open, visible => { if (visible) generateConfirmations() })
 
 const deleteAllKeys = async (): Promise<void> => {
-  await api.deleteUserAccessKeys(model.localLogin.value!).then(() => {
-    notification.success({
-      message: "Все удалено",
-      placement: 'bottomRight',
-      duration: 5
-    })
-  }).catch((e: any) => {
-    notification.error({
-      message: "Произошла ошибка",
-      description: JSON.parse(e).cause.message,
-      placement: 'bottomRight',
-      duration: 5
-    })
-    throw e
-  })
+  try {
+    await api.deleteUserAccessKeys(model.localLogin!)
+    notifySuccess('Все удалено')
+  } catch (error) {
+    notifyError('Произошла ошибка', error)
+    throw error
+  }
 }
 
-
-const ok = async () =>  {
+const submit = async (): Promise<void> => {
   try {
-    await formRef.value.validate()
+    await formRef.value?.validate()
     await deleteAllKeys()
-    controller.hidden()
-  } catch { }
+    open.value = false
+  } catch {
+    // Ошибки валидации и удаления уже показаны пользователю.
+  }
 }
 </script>
 
 <template>
-  <Modal :controller="controller">
+  <Modal v-model:open="open" title="Удалить все ключи">
     <template #form>
-      <a-form class="main-container" layout="vertical" ref="formRef" :model="model">
-        <a-form-item label="Логин пользователя" v-if="userStore.superUser" name="localLogin" class="field"
-          :rules="[{ required: true, message: 'Обязательное поле' }]">
-          <a-input v-model:value="model.localLogin" />
-        </a-form-item>
+      <Form ref="formRef" :model="model">
+        <FormInput
+          v-if="userStore.superUser"
+          name="localLogin"
+          label="Логин пользователя"
+          :rules="[{ required: true, message: 'Обязательное поле' }]"
+        />
 
-        <a-form-item label="Вы точно уверены?" name="confirmations" :rules="[
-          {
-            validator: async (_: any, value: (boolean | null)[]) => {
-              if (!value || value.some((v: boolean | null) => v !== true)) {
-                throw new Error('Необходимо везде выбрать «Да»')
-              }
-            }
-          }
-        ]">
-          <div v-for="(item, index) in confirmationsMeta" :key="index">
-            <a-radio-group class="field" v-model:value="model.confirmations[index]" button-style="solid">
-              <a-radio-button v-for="option in item.options" :key="option.label" class="button" :value="option.value">
-                {{ option.label }}
-              </a-radio-button>
-            </a-radio-group>
-          </div>
-        </a-form-item>
-      </a-form>
+        <FormSelect
+          v-for="(item, index) in confirmationsMeta"
+          :key="index"
+          :name="['confirmations', index]"
+          :label="index === 0 ? 'Вы точно уверены?' : undefined"
+          :options="item.options"
+          :rules="confirmationRules"
+          radioButtonStyle="solid"
+          view="radio-button"
+          class="confirmation"
+        />
+      </Form>
     </template>
 
     <template #footer>
-      <a-button type="primary" @click="ok">Удалить</a-button>
-      <a-button type="text" @click="controller.hidden()">Отмена</a-button>
+      <Button type="primary" @click="submit">Удалить</Button>
+      <Button type="text" @click="open = false">Отмена</Button>
     </template>
   </Modal>
 </template>
-
-<style scoped>
-.field {
-  width: 100%;
-  margin-bottom: 10px !important;
-}
-
-.field .button {
-  width: 50%;
-}
-</style>

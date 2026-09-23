@@ -1,6 +1,6 @@
 export const parseDate = (value: string | number): Date | null => {
   // Timestamp
-  if (/^\d+$/.test(value.toString())) {
+  if (value && /^\d+$/.test(value.toString())) {
     const date = new Date(Number(value))
     return isNaN(date.getTime()) ? null : date
   }

@@ -1,27 +1,28 @@
 <script setup lang="ts">
-import { h, reactive, ref } from 'vue'
-import { notification, Button } from "ant-design-vue"
-
-import Modal from '../../components/naumen/Modal.vue'
+import { computed, h, reactive, ref } from 'vue'
+import { Button, Form, FormDate, FormInput, FormNumber, FormSelect, Modal } from '@minitwiks/nsmp-vue-components'
+import { notifyError, notifySuccess } from '../../utils/notification'
 
 import type { ICreateKeyForm } from "../../utils/types.ts"
 import ConnectorService from '../../utils/connector.ts'
 import { useUserStore } from '../../stores/user.ts'
 import { useSearchStore } from '../../stores/search'
-import { AlertFiledObject, ModalController } from '../../utils/fileds.ts'
-
-const controller = new ModalController("Создать ключ")
-const descriptionAlertController = new AlertFiledObject(false, 'info', true, "Для чего используется ключ").show()
 
 const userStore = useUserStore()
 const searchStore = useSearchStore()
 
 const api: ConnectorService = new ConnectorService()
-const formRef = ref()
-const loading = ref<boolean>(false)
-const dateFormat = ref<string>('DD.MM.YYYY HH:mm')
+const formRef = ref<{ validate: () => Promise<unknown> }>()
+const loading = ref(false)
+const open = ref(false)
+const dateFormat = 'DD.MM.YYYY HH:mm'
 
-defineExpose({controller})
+const lifetimeOptions = [
+  { label: 'В днях', value: 'days' },
+  { label: 'Дедлайн', value: 'deadline' },
+]
+
+defineExpose({ open })
 
 const model = reactive<ICreateKeyForm>({
   login: userStore.login,
@@ -32,15 +33,20 @@ const model = reactive<ICreateKeyForm>({
   onetime: false
 })
 
+const keyType = computed<number>({
+  get: () => Number(model.onetime),
+  set: value => model.onetime = Boolean(value),
+})
+
 const createNewToken = async (): Promise<void> => {
-  if (model.deadlineMode == 'days') model.deadline = null
-  if (model.deadlineMode == 'deadline') model.keyDays = null
+  if (model.deadlineMode === 'days') model.deadline = null
+  if (model.deadlineMode === 'deadline') model.keyDays = null
   loading.value = true
 
-  await api.addAccessKey(model.login!, model.keyDays, model.description, model.onetime, model.deadline).then((data: any) => {
-    notification.success({
-      message: "Ключ успешно создан",
-      btn: () => h(
+  try {
+    const data = await api.addAccessKey(model.login!, model.keyDays, model.description, model.onetime, model.deadline)
+    notifySuccess('Ключ успешно создан', {
+      action: h(
         Button,
         {
           type: 'primary',
@@ -49,88 +55,81 @@ const createNewToken = async (): Promise<void> => {
         },
         { default: () => 'Скопировать ключ' },
       ),
-      placement: 'bottomRight',
-      duration: 5
     })
     searchStore.setSearchData(searchStore.data!)
-  }).catch((e: any) => {
-    notification.error({
-      message: "Произошла ошибка",
-      description: JSON.parse(e).cause.message,
-      placement: 'bottomRight',
-      duration: 5
-    })
-    throw e
-  }).finally(() => {
+  } catch (error) {
+    notifyError('Произошла ошибка', error)
+    throw error
+  } finally {
     loading.value = false
-  })
+  }
 }
 
-const ok = async ():Promise<void> => {
-  const ok = await formRef.value.validate().then(() => {return true}).catch(() => {return false})
-  if (ok) {
-    createNewToken()
-    controller.hidden()
+const submit = async (): Promise<void> => {
+  try {
+    await formRef.value?.validate()
+    await createNewToken()
+    open.value = false
+  } catch {
+    // Ошибки валидации и создания уже показаны пользователю.
   }
 }
 
 </script>
 
 <template>
-  <Modal :controller="controller">
+  <Modal v-model:open="open" title="Создать ключ">
     <template #form>
-      <a-form ref="formRef" :model="model" class="main-container" layout="vertical">
-        <a-form-item name="login" :rules="[{ required: true, message: 'Надо' }]" v-if="userStore.superUser" label="Логин пользователя">
-          <a-input class="field" v-model:value="model.login" />
-        </a-form-item>
+      <Form ref="formRef" :model="model">
+        <FormInput
+          v-if="userStore.superUser"
+          name="login"
+          label="Логин пользователя"
+          :rules="[{ required: true, message: 'Надо' }]"
+        />
 
-        <a-form-item name="deadlineMode" label="Время жизни">
-          <a-radio-group class="field" v-model:value="model.deadlineMode">
-            <a-radio-button class="r-btn" value="days">В днях</a-radio-button>
-            <a-radio-button class="r-btn" value="deadline">Дедлайн</a-radio-button>
-          </a-radio-group>
-        </a-form-item>
+        <FormSelect
+          name="deadlineMode"
+          label="Время жизни"
+          radioButtonStyle="solid"
+          :options="lifetimeOptions"
+          view="radio-button"
+        />
 
-        <a-form-item name="deadline" v-if="model.deadlineMode == 'deadline'" label="Дедлайн">
-          <a-date-picker class="field" v-model:value="model.deadline" :format="dateFormat" :value-format="dateFormat"
-            placeholder=" " />
-        </a-form-item>
+        <FormDate
+          v-if="model.deadlineMode === 'deadline'"
+          name="deadline"
+          label="Дедлайн"
+          type="datetime"
+          :date-picker-props="{ format: dateFormat, valueFormat: dateFormat }"
+        />
 
-        <a-form-item name="keyDays" v-if="model.deadlineMode == 'days'" label="Срок жизни в днях">
-          <a-input-number class="field" v-model:value="model.keyDays" />
-        </a-form-item>
+        <FormNumber
+          v-if="model.deadlineMode === 'days'"
+          name="keyDays"
+          label="Срок жизни в днях"
+        />
 
-        <a-form-item name="description" :rules="[{ required: true, message: 'Надо' }]" label="Описание">
-          <a-alert 
-            v-if="descriptionAlertController.visiable.value" 
-            :type="descriptionAlertController.type.value" 
-            :closable="descriptionAlertController.closable.value"
-            :show-icon="descriptionAlertController.showIcon.value" 
-        >
-            <template #message>
-                {{ descriptionAlertController.message.value }}
-            </template>
-        </a-alert>
-          <a-input placeholder="" class="field" v-model:value="model.description" />
-        </a-form-item>
+        <FormInput
+          name="description"
+          label="Описание"
+          description="Для чего используется ключ"
+          :rules="[{ required: true, message: 'Надо' }]"
+        />
 
-        <a-form-item name="onetime" label="Тип">
-          <a-radio-group v-model:value="model.onetime" class="field">
-            <a-radio-button class="r-btn" :value="false">Многоразовый</a-radio-button>
-            <a-radio-button class="r-btn" :value="true">Одноразовый</a-radio-button>
-          </a-radio-group>
-        </a-form-item>
-      </a-form>
+        <FormSelect
+          v-model:value="keyType"
+          name="onetime"
+          radioButtonStyle="solid"
+          label="Тип"
+          :options="[{ label: 'Многоразовый', value: 0 }, { label: 'Одноразовый', value: 1 }]"
+          view="radio-button"
+        />
+      </Form>
     </template>
     <template #footer>
-      <a-button type="primary" @click="ok" :loading="loading">Создать</a-button>
-      <a-button type="text" @click="controller.hidden()">Отмена</a-button>
+      <Button type="primary" :loading="loading" @click="submit">Создать</Button>
+      <Button type="text" @click="open = false">Отмена</Button>
     </template>
   </Modal>
 </template>
-
-<style scoped>
-.field {
-  margin-bottom: 10px;
-}
-</style>

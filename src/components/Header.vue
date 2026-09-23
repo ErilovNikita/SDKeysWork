@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import PlusIcon from '../assets/icons/plus.svg'
-import DeleteIcon from '../assets/icons/delete.svg'
-import SearchIcon from '../assets/icons/zoomIn.svg'
-
+import { reactive } from 'vue'
+import { Alert, Button, type AlertType } from '@minitwiks/nsmp-vue-components'
+import { DeleteIcon, PlusIcon, ZoomInIcon } from 'nsmp-icons'
 import { useUserStore } from '../stores/user'
 import { useSearchStore } from '../stores/search'
-import { AlertFiledObject } from '../utils/fileds'
 import { compareVersions, getLastVersion } from '../utils/services'
 import { SearchMode } from '../utils/types'
 
@@ -18,28 +16,25 @@ const emit = defineEmits<{
 
 const searchStore = useSearchStore()
 const userStore = useUserStore()
-const versionController = new AlertFiledObject(false, 'info', true)
+const version = reactive({ open: false, type: 'info' as AlertType, message: '' })
+const setVersion = (type: AlertType, message: string) => Object.assign(version, { open: true, type, message })
 
 getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
     switch(compareVersions(__APP_VERSION__, remoteVersion)) {
         case 1:
-            versionController.setType('warning')
-            versionController.setMessage(`Вы используете тестовую версию ${__APP_VERSION__}! Свяжитесь с поддержкой для исправления.`)
+            setVersion('warning', `Вы используете тестовую версию ${__APP_VERSION__}! Свяжитесь с поддержкой для исправления.`)
             console.warn(`Последний релиз в репозитории: ${remoteVersion} < ${__APP_VERSION__}`)
             break
         case -1:
-            versionController.setType('error')
-            versionController.setMessage(`Ваша версия ${__APP_VERSION__} устарела! Сбросьте кеш браузера, чтобы получить новую версию.`)
+            setVersion('error', `Ваша версия ${__APP_VERSION__} устарела! Сбросьте кеш браузера, чтобы получить новую версию.`)
             console.warn(`Последний релиз в репозитории: ${remoteVersion} > ${__APP_VERSION__}`)
             break
         case 0:
-            versionController.setType('success')
-            versionController.setMessage(`Используется актуальная версия ${__APP_VERSION__}`)
+            setVersion('success', `Используется актуальная версия ${__APP_VERSION__}`)
             break
     }
 }) .catch(e => {
-    versionController.setType('error')
-    versionController.setMessage((e as Error).message + ". Свяжитесь с поддержкой для исправления.") 
+    setVersion('error', (e as Error).message + ". Свяжитесь с поддержкой для исправления.")
 })
 </script>
 
@@ -48,48 +43,31 @@ getLastVersion('ErilovNikita', 'SDKeysWork').then(remoteVersion => {
     <a-col :span="12">
       <a-space v-if="userStore?.canUse">
         <a-space :size="1">
-          <a-button 
-            type="primary" 
-            class="cardButton" 
+          <Button
+            type="default"
+            :icon="ZoomInIcon"
             v-if="userStore?.superUser"
             @click="emit('showModal:Search')"
-          >
-            <SearchIcon />Поиск
-          </a-button>
-
+          >Поиск</Button>
         </a-space>
 
-        <a-button 
-          type="primary" 
-          class="cardButton" 
+        <Button
+          type="default"
+          :icon="PlusIcon"
           @click="emit('showModal:CreateKey')"
-        >
-          <PlusIcon />Создать ключ
-        </a-button>
+        >Создать ключ</Button>
 
-        <a-button 
-          type="primary" 
-          class="cardButton" 
+        <Button
+          type="default"
+          :icon="DeleteIcon"
           @click="emit('showModal:DeleteAllKeys')"
-        >
-          <DeleteIcon />Удалить все ключи
-        </a-button>
+        >Удалить все ключи</Button>
 
       </a-space>
     </a-col>
     <a-col :span="12">
       <a-flex justify="end">
-        <a-alert 
-            v-if="versionController.visiable.value" 
-            :type="versionController.type.value" 
-            :closable="versionController.closable.value"
-            :show-icon="versionController.showIcon.value" 
-            @close="versionController.hidden()"
-        >
-            <template #message>
-                {{ versionController.message.value }}
-            </template>
-        </a-alert>
+        <Alert v-model:open="version.open" :type="version.type" :message="version.message" :closable="false" show-icon />
       </a-flex>
     </a-col>
   </a-row>

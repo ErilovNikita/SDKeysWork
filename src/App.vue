@@ -30,12 +30,15 @@ const deleteKeysModalRef = ref<InstanceType<typeof DeleteKeysModal> | null>(null
 const keyInfoModalRef = ref<InstanceType<typeof AccessKeyModal> | null>(null)
 const searchModalRef = ref<InstanceType<typeof SearchModal> | null>(null)
 
-new ConnectorService().getUserData().then( (data:IUser) => userStore.setUser(data))
+const handleCreateKeyModalShow = (): void => { if (createKeyModalRef.value) createKeyModalRef.value.open = true }
+const handleDeleteKeysModalShow = (): void => { if (deleteKeysModalRef.value) deleteKeysModalRef.value.open = true }
+const handleKeyInfoModalShow = (): void => {
+if (keyInfoModalRef.value) keyInfoModalRef.value.open = true
+}
+const handleSearchModalShow = ():any => {
+if (searchModalRef.value) searchModalRef.value.open = true
+}
 
-const handleCreateKeyModalShow = ():any => createKeyModalRef.value?.controller.show()
-const handleDeleteKeysModalShow = ():any => deleteKeysModalRef.value?.controller.show()
-const handleKeyInfoModalShow = ():any => keyInfoModalRef.value?.controller.show()
-const handleSearchModalShow = ():any => searchModalRef.value?.controller.show()
 const handleResetSearch = ():any => {
   keysListRef.value?.getPage('all')
   keysListRef.value?.resetCurrentPage()

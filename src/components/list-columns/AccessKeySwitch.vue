@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import {notification} from "ant-design-vue"
+import { FormSwitch } from '@minitwiks/nsmp-vue-components'
+import { notifyError, notifySuccess } from '../../utils/notification'
 
-import { IKeyInfo } from "../../utils/types"
+import type { IKeyInfo } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
 import { parseDate } from "../../utils/services"
 
-import ClockIcon from '../../assets/icons/clock.svg'
+import { ClockIcon } from 'nsmp-icons/vue'
 import { computed } from "vue"
 
 const props = defineProps<{accessKey: IKeyInfo}>()
@@ -20,32 +21,22 @@ const keyActive = computed(() => {
   return props.accessKey.active && !keyExpired.value
 })
 
-const errorSwitch = (e: any):void => {
-  notification.error({
-    message: "Произошла ошибка",
-    description : JSON.parse(e).cause.message,
-    placement: 'bottomRight',
-    duration: 5
-  })
+const errorSwitch = (error: unknown): void => {
+  notifyError('Произошла ошибка', error)
 }
 
-const successSwitch = (description:string):any => {
-  notification.success({
-    message: "Ключ успешно изменен",
-    description: description,
-    placement: 'bottomRight',
-    duration: 5
-  })
+const successSwitch = (description: string): void => {
+  notifySuccess('Ключ успешно изменен', {description})
   props.accessKey.active = !props.accessKey.active
 }
 
 const toggle = ():void => {
-  if (!props.accessKey.active) api.enableKey(props.accessKey.uuid)
-    .then(successSwitch("Ключ доступа активирован"))
-    .catch(errorSwitch)
-  else api.disableKey(props.accessKey.uuid)
-    .then(successSwitch("Ключ доступа отключен"))
-    .catch(errorSwitch)
+  const request = props.accessKey.active
+    ? api.disableKey(props.accessKey.uuid)
+    : api.enableKey(props.accessKey.uuid)
+  const message = props.accessKey.active ? 'Ключ доступа отключен' : 'Ключ доступа активирован'
+
+  request.then(() => successSwitch(message)).catch(errorSwitch)
 }
 
 </script>
@@ -53,7 +44,13 @@ const toggle = ():void => {
 <template>
     <div class="switch">
       <ClockIcon style="opacity: .5;" v-if="props.accessKey.uuid == usingEnvAccessKey"/>
-      <a-switch :checked="keyActive" :disabled="keyExpired" @click='toggle' size="small" v-else/>
+      <FormSwitch
+        v-else
+        :checked="keyActive"
+        :switch-props="{ disabled: keyExpired, size: 'small' }"
+        :form-item-props="{ noStyle: true }"
+        @change="toggle"
+      />
     </div>
 </template>
 

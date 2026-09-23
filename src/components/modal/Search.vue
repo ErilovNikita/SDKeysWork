@@ -1,64 +1,62 @@
 <script setup lang="ts">
-import {reactive, ref, watch} from 'vue'
+import { reactive, ref, watch } from 'vue'
 
-import Modal from '../../components/naumen/Modal.vue'
+import { Button, Form, FormInput, FormSelect, Modal } from '@minitwiks/nsmp-vue-components'
 import {useSearchStore} from '../../stores/search'
 
-import {ModalController} from '../../utils/fileds'
 import {SearchMode} from '../../utils/types'
 
+const open = ref(false)
 const emit = defineEmits<{ (e: 'search', value: string): void }>()
-const controller = new ModalController("Поиск")
-const loading = ref<boolean>(false)
-const formRef = ref()
+const formRef = ref<{ validate: () => Promise<unknown> }>()
 const searchStore = useSearchStore()
-const model = reactive<any>({searchData: ""})
+const model = reactive({ searchData: '' })
 
-const ok = async (): Promise<void> => {
-  const ok = await formRef.value.validate().then(() => {
-    return true
-  }).catch(() => {
-    return false
-  })
-  if (ok) {
-    controller.hidden()
+const submit = async (): Promise<void> => {
+  try {
+    await formRef.value?.validate()
+    open.value = false
     emit('search', model.searchData)
-    model.searchData = ""
+    model.searchData = ''
+  } catch {
+    // Ошибка валидации отображается компонентом формы.
   }
 }
-
 
 watch(() => searchStore.mode, () => {
   model.searchData = ''
 })
 
-defineExpose({controller})
+defineExpose({open})
 </script>
 
 <template>
-  <Modal :controller="controller">
+  <Modal title="Поиск" v-model:open="open">
     <template #form>
-      <a-form ref="formRef" :model="model" layout="vertical">
-        <a-form-item :rules="[{ required: true, message: 'Обязательно к заполнению' }]" label="Тип поиска"
-                     style="margin-bottom: 10px;">
-          <a-radio-group v-model:value="searchStore.mode" button-style="solid">
-            <a-radio-button :value="SearchMode.Login" @click="searchStore.setSearchMode(SearchMode.Login)">Логину
-            </a-radio-button>
-            <a-radio-button :value="SearchMode.UUID" @click="searchStore.setSearchMode(SearchMode.UUID)">Ключу
-            </a-radio-button>
-          </a-radio-group>
-        </a-form-item>
+      <Form ref="formRef" :model="model">
+        <FormSelect
+          v-model:value="searchStore.mode"
+          label="Тип поиска"
+          :options="[
+            { label: 'Логину', value: SearchMode.Login },
+            { label: 'Ключу', value: SearchMode.UUID },
+          ]"
+          view="radio-button"
+          radio-button-style="solid"
+        />
 
-        <a-form-item name="searchData" :rules="[{ required: true, message: 'Обязательно к заполнению' }]"
-                     :label="searchStore.mode == SearchMode.Login ? 'Логин' : 'Значение ключа'">
-          <a-input v-model:value="model.searchData" placeholder=""/>
-        </a-form-item>
-      </a-form>
+        <FormInput
+          v-model:value="model.searchData"
+          name="searchData"
+          :label="searchStore.mode === SearchMode.Login ? 'Логин' : 'Значение ключа'"
+          :rules="[{ required: true, message: 'Обязательно к заполнению' }]"
+        />
+      </Form>
     </template>
 
     <template #footer>
-      <a-button type="primary" @click="ok" :loading="loading">Искать</a-button>
-      <a-button type="text" @click="controller.hidden()">Отмена</a-button>
+      <Button type="primary" @click="submit">Искать</Button>
+      <Button type="text" @click="open = false">Отмена</Button>
     </template>
   </Modal>
 </template>
