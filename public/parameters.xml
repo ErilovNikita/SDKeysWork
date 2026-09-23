@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <embeddedAppParameters> <!-- Корневой атрибут с настройками параметров -->
+    <parameters>
+        <parameter seg-detach="true" seg-id="hideAccessKey" seg-type="form-parameters">
+            <attrs-for-date-time-restriction-script/>
+            <attrs-in-cof-script/>
+            <code>hideAccessKeys</code>
+            <complexRelation>false</complexRelation>
+            <complexRelationAggrAttrGroups>
+                <entry>
+                    <key>
+                        <id>employee</id>
+                    </key>
+                </entry>
+                <entry>
+                    <key>
+                        <id>team</id>
+                    </key>
+                </entry>
+                <entry>
+                    <key>
+                        <id>ou</id>
+                    </key>
+                </entry>
+            </complexRelationAggrAttrGroups>
+            <computable-on-form>false</computable-on-form>
+            <default-by-script>false</default-by-script>
+            <default-value>
+                <bool>true</bool>
+            </default-value>
+            <description>Отображение анимированной заглушки для скрытия ключей</description>
+            <is-edit-on-complex-form-only>false</is-edit-on-complex-form-only>
+            <edit-presentaion>
+                <code>checkbox</code>
+            </edit-presentaion>
+            <editable>true</editable>
+            <is-filtered-by-script>false</is-filtered-by-script>
+            <hiddenAttrCaption>false</hiddenAttrCaption>
+            <is-hidden-when-no-possible-values>false</is-hidden-when-no-possible-values>
+            <hideArchived>false</hideArchived>
+            <required>false</required>
+            <title lang="ru">Скрывать ключи</title>
+            <type>
+                <code>bool</code>
+                <property code="permittedTypes">[]</property>
+            </type>
+            <view-presentaion>
+                <code>yesNo</code>
+            </view-presentaion>
+        </parameter>
+    </parameters>
+</embeddedAppParameters>
