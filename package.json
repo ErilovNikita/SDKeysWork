@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
-    "build": "vue-tsc -b && vite build",
+    "build": "npm run pack:modules && vue-tsc -b && vite build",
+    "pack:modules": "node scripts/pack-modules.js",
     "deploy": "node scripts/deploy.js",
     "release": "npm run build && npm run deploy"
   },

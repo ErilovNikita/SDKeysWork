@@ -39,6 +39,8 @@ node_modules/
 dist/
 build/
 out/
+public/modules/*
+public/modules
 
 # Vite cache
 .vite/

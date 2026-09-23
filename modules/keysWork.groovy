@@ -40,12 +40,9 @@ abstract class Parameters {
     /**
      * Перечень логинов, владельцы котрых будет считаться суперпользователеями
      */
-    static final List<String> SUPERUSER_LOGINS = ['egor_machine']
+    static final List<String> SUPERUSER_LOGINS = []
     /** Продакшн хост */
-    static final List<String> TEST_HOSTS = [
-            'my.sd.ru',
-            'ebat.kakoi.ya.molodec'
-    ]
+    static final List<String> TEST_HOSTS = []
 }
 
 abstract class Dto {
