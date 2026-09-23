@@ -10,8 +10,7 @@ import json from 'highlight.js/lib/languages/json'
 import hljsVuePlugin from "@highlightjs/vue-plugin"
 
 import 'highlight.js/styles/lightfair.css'
-import './assets/styles/antCustomStyles.css'
-import './assets/styles/main.css'
+import './assets/styles/index.css'
 
 const mapping = {
     ...initVariableEnvMapping,
