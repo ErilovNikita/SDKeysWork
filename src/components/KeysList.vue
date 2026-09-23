@@ -46,10 +46,10 @@ const getPage = (type:'all'|'user' = 'all') =>  {
   let promise: Promise<IKeysList>
 
   if (userStore.superUser == false && userStore.canUse == true) {
-    promise = api.getUserAccessKeysPage(userStore.login!, pagination.value.current, pagination.value.pageSize)
+    promise = api.getAccessKeysPage(pagination.value.current, pagination.value.pageSize, userStore.login!)
   } else {
-    if (type == 'user') promise = api.getUserAccessKeysPage(searchStore.data!, pagination.value.current, pagination.value.pageSize)
-    else promise = api.getAllAccessKeysPage(pagination.value.current, pagination.value.pageSize)
+    if (type == 'user') promise = api.getAccessKeysPage(pagination.value.current, pagination.value.pageSize, searchStore.data!)
+    else promise = api.getAccessKeysPage(pagination.value.current, pagination.value.pageSize)
   }
 
   promise.then((data: IKeysList) => {

@@ -1,12 +1,13 @@
 /**
  * Автор: Erilov.NA
  * Дата создания: 12.07.2024
- * Версия: 5.2
+ * Версия: 5
  * История:
  * nerilov - 12.07.2024 - v4.1.1 - создано
- * ekazantsev - 05.02.2026 - v5 - переписано на web_api_components с добавлением валидации пользователя + добавлены новые методы
- * ekazantsev - 09.02.2026 - v5.1 - добавлен метод получения всех ключей. исправлены баги пагинации
- * nerilov - 18.02.2026 - v5.2 - добавлен метод для редактирования ключей
+ * ekazantsev - 05.02.2025 - v5 - переписано на web_api_components с добавлением валидации пользователя + добавлены новые методы
+ * ekazantsev - 09.02.2025 - v5.1 - добавлен метод получения всех ключей. исправлены баги пагинации
+ * ekazantsev - 17.09.2026 - v5.2 - методы получения всех ключей и ключей пользователя объедены в один, добавлен параметр для указания логинов пользователей, каторые считаются как суперпользователи
+
  *
  * Исходники ВП вы можете найти в репозиторих:
  * https://github.com/ErilovNikita/SDKeysWork/tree/main - основной
@@ -14,8 +15,6 @@
  */
 package ru.sdkeyswork.keysWork
 
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import ru.kazantsev.nsd.modules.web_api_components.Preferences
 import ru.kazantsev.nsd.modules.web_api_components.RequestProcessor
 import ru.kazantsev.nsd.modules.web_api_components.WebApiException
@@ -26,7 +25,8 @@ import ru.naumen.core.shared.dto.ISDtObject
 import ru.naumen.core.server.script.api.accesskeys.AccessKey
 
 //из либы https://github.com/exeki/nsd.sdk.global_variables для типизации
-//import static ru.kazantsev.nsd.sdk.global_variables.ApiPlaceholder.*;
+import static ru.kazantsev.nsd.sdk.global_variables.ApiPlaceholder.*;
+import static ru.kazantsev.nsd.sdk.global_variables.ControllerVariablesPlaceholder.*;
 
 /**
  * Параметры, от низ зависит как будет работать модуль
@@ -37,10 +37,15 @@ abstract class Parameters {
      * которые соответствуют перечисленным хостам в параметре TEST_HOSTS.
      * При этом пользователи смогут работать только со своими ключами.
      */
-    static final Boolean ALLOW_TO_ALL_IN_TEST_ENV = false
+    static final Boolean ALLOW_TO_ALL_IN_TEST_ENV = true
+    /**
+     * Перечень логинов, владельцы котрых будет считаться суперпользователеями
+     */
+    static final List<String> SUPERUSER_LOGINS = ['egor_machine']
     /** Продакшн хост */
     static final List<String> TEST_HOSTS = [
-
+            'my.sd.ru',
+            'ebat.kakoi.ya.molodec'
     ]
 }
 
@@ -218,7 +223,7 @@ abstract class PermissionsService {
      * @return да или нет
      */
     static Boolean isSuperuser(ISDtObject user) {
-        return user == null
+        return user == null || (String) user.login in Parameters.SUPERUSER_LOGINS
     }
 
     /**
@@ -251,11 +256,13 @@ abstract class PermissionsService {
  * pageNumber - номер страницы
  * pageSize - размер страницы
  */
+@Deprecated
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getUserAccessKeysPage(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getUserAccessKeysPage() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String value = webUtils.getParamElseThrow('value').toLowerCase()
+        //if(user) value = user.login
         PermissionsService.asserUsersLogin(user, value)
         Utilities.getUserOrThrow(value)
         Integer currentPage = webUtils.getParam('pageNumber', Integer).orElse(1)
@@ -277,13 +284,56 @@ void getUserAccessKeysPage(HttpServletRequest request, HttpServletResponse respo
 
 /**
  * GET
+ * Метод для получения данных ключей пользователя
+ * url параметры:
+ * searchLogin - Строковое значение логина сотрудника
+ * pageNumber - номер страницы
+ * pageSize - размер страницы
+ */
+@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
+void getAccessKeysPage() {
+    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
+        PermissionsService.assertUserCanUseApplication(user)
+        String searchLogin = webUtils.getParam('searchLogin').orElse(null)
+        if (!PermissionsService.isSuperuser(user)) searchLogin = user.login
+        if (searchLogin) Utilities.getUserOrThrow(searchLogin)
+        Integer currentPage = webUtils.getParam('pageNumber', Integer).orElse(1)
+        Integer pageSize = webUtils.getParam('pageSize', Integer).orElse(20)
+        Integer offset = (currentPage - 1) * pageSize
+        Integer limit = pageSize
+        if (searchLogin) webUtils.setBodyAsJson(
+                new Dto.KeysList(
+                        data: api.auth.getEmployeeAccessKeysInfoByLogin(searchLogin, offset, limit) as Collection<Map<String, Object>>,
+                        pages: new Dto.KeysList.Pages(
+                                count: Utilities.getUsersKeysCount(searchLogin),
+                                current: currentPage,
+                                pageSize: pageSize
+                        )
+                )
+        )
+        else webUtils.setBodyAsJson(
+                new Dto.KeysList(
+                        data: api.auth.getAllAccessKeysInfo(offset, limit) as Collection<Map<String, Object>>,
+                        pages: new Dto.KeysList.Pages(
+                                count: Utilities.getAllKeysCount(),
+                                current: currentPage,
+                                pageSize: pageSize
+                        )
+                )
+        )
+    }
+}
+
+/**
+ * GET
  * Метод для получения данных ключей
  * url параметры:
  * pageNumber - номер страницы
  * pageSize - размер страницы
  */
+@Deprecated
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getAllAccessKeysPage(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getAllAccessKeysPage() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserIsSuperuser(user)
         Integer currentPage = webUtils.getParam('pageNumber', Integer).orElse(1)
@@ -304,7 +354,7 @@ void getAllAccessKeysPage(HttpServletRequest request, HttpServletResponse respon
 }
 
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getAccessKeyInfo(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getAccessKeyInfo() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String value = webUtils.getParamElseThrow('uuid').toLowerCase()
@@ -324,7 +374,7 @@ void getAccessKeyInfo(HttpServletRequest request, HttpServletResponse response, 
  * deadline - конкретный дедлайн ключа. паттерн указан в константах
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void addAccessKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void addAccessKey() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String login = webUtils.getParamElseThrow('login')
@@ -343,37 +393,12 @@ void addAccessKey(HttpServletRequest request, HttpServletResponse response, ISDt
 
 /**
  * GET
- * Метод для редактирования существующего ключа с помощью его UUID
- * url параметры:
- * description - описание ключа. не обязательный
- * deadline - конкретный дедлайн ключа. паттерн указан в константах
- */
-@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void updateKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
-    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
-        PermissionsService.assertUserCanUseApplication(user)
-        String uuid = webUtils.getParamElseThrow('uuid')
-        def dao = api.auth.accessKeyDao
-        def key = dao.get(uuid)
-        String username = key.username
-        PermissionsService.asserUsersLogin(user, username)
-        String description = webUtils.getParam('description').orElse(null)
-        Date deadline = webUtils.getParamElseThrow('deadline', Date)
-        key.setDescription(description)
-        key.setDeadline(deadline)
-        dao.update(key)
-        webUtils.setBodyAsJson(key)
-    }
-}
-
-/**
- * GET
  * Метод для деактивации ключа с помощью его UUID
  * url параметры:
  * uuid - UUID самого ключа
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void disableAccessKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void disableAccessKey() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String uuid = webUtils.getParamElseThrow('uuid')
@@ -395,7 +420,7 @@ void disableAccessKey(HttpServletRequest request, HttpServletResponse response, 
  * username - username пользователя
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void deleteUserAccessKeys(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void deleteUserAccessKeys() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String username = webUtils.getParamElseThrow('username')
@@ -419,7 +444,7 @@ void deleteUserAccessKeys(HttpServletRequest request, HttpServletResponse respon
  * uuid - UUID самого ключа
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void activateAccessKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void activateAccessKey() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String uuid = webUtils.getParamElseThrow('uuid')
@@ -435,7 +460,7 @@ void activateAccessKey(HttpServletRequest request, HttpServletResponse response,
  * uuid - UUID самого ключа
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void deleteAccessKey(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void deleteAccessKey() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String uuid = webUtils.getParamElseThrow('uuid')
@@ -454,7 +479,7 @@ void deleteAccessKey(HttpServletRequest request, HttpServletResponse response, I
  * @param login - Логин пользователя
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getThemeByUser(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getThemeByUser() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         PermissionsService.assertUserCanUseApplication(user)
         String login = webUtils.getParamElseThrow('login')
@@ -476,7 +501,7 @@ void getThemeByUser(HttpServletRequest request, HttpServletResponse response, IS
  * Получить данные для инициализации
  */
 @SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
-void getInitData(HttpServletRequest request, HttpServletResponse response, ISDtObject user) {
+void getInitData() {
     RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
         webUtils.setBodyAsJson(
                 new Dto.InitialData(
@@ -484,5 +509,30 @@ void getInitData(HttpServletRequest request, HttpServletResponse response, ISDtO
                         canUse: PermissionsService.canUserUseApplication(user)
                 )
         )
+    }
+}
+
+/**
+ * GET
+ * Метод для редактирования существующего ключа с помощью его UUID
+ * url параметры:
+ * description - описание ключа. не обязательный
+ * deadline - конкретный дедлайн ключа. паттерн указан в константах
+ */
+@SuppressWarnings(['unused', 'GrMethodMayBeStatic'])
+void updateKey() {
+    RequestProcessor.create(request, response, user, Utilities.getPrefs().copy().assertHttpMethod('GET')).process { WebApiUtilities webUtils ->
+        PermissionsService.assertUserCanUseApplication(user)
+        String uuid = webUtils.getParamElseThrow('uuid')
+        def dao = api.auth.accessKeyDao
+        def key = dao.get(uuid)
+        String username = key.username
+        PermissionsService.asserUsersLogin(user, username)
+        String description = webUtils.getParam('description').orElse(null)
+        Date deadline = webUtils.getParamElseThrow('deadline', Date)
+        key.setDescription(description)
+        key.setDeadline(deadline)
+        dao.update(key)
+        webUtils.setBodyAsJson(key)
     }
 }
