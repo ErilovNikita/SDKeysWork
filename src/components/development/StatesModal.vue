@@ -9,7 +9,7 @@ const userStore = useUserStore()
 
 <template>
     <a-collapse class="site-collapse-custom-collapse" :accordion="true">
-        <a-collapse-panel key="1" header="Отладочные данные">
+        <a-collapse-panel key="1" header="Отладочные данные" class="developmentModal">
             <p class="header">Пользовательские данные:</p>
             <p><b>login: </b>{{ userStore.login }}</p>
             <p><b>title: </b>{{ userStore.title }}</p>
@@ -32,12 +32,19 @@ const userStore = useUserStore()
     bottom: 20px;
     left: 20px;;
 }
-.header {
-    margin-top: 20px;
-    margin-bottom: 10px !important;
+.developmentModal p {
+    margin-top: 1px !important;
+    margin-bottom: 0px !important;
+}
+.developmentModal p > b {
+    opacity: .7;
+}
+.developmentModal .header {
+    margin-top: 10px !important;
+    margin-bottom: 1px !important;
     font-weight: 600 !important;
 }
-p {
-    margin-bottom: 0px;
+.developmentModal .header:nth-of-type(1) {
+    margin-top: 0 !important;
 }
 </style>
