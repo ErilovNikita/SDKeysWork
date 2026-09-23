@@ -6,49 +6,26 @@ import { useSearchStore } from "../../stores/search.ts"
 import ConnectorService from "../../utils/connector"
 import { formatSmartDate } from "../../utils/services"
 
-type LoadResult = 'success' | 'error'
-const open = ref(false)
-
-let resolveResult: ((r: LoadResult) => void) | null = null
+const open = defineModel<boolean>('open', { default: false })
 const api: ConnectorService = new ConnectorService()
 const searchStore = useSearchStore()
 const keyInfo = ref<IKeyInfo | null>(null)
-
-const waitForResult = (): Promise<LoadResult> => {
-  if (resolveResult) console.warn('waitForResult already pending')
-  return new Promise(resolve => resolveResult = resolve)
-}
-
-const notifySuccess = () => {
-  resolveResult?.('success')
-  resolveResult = null
-}
-
-const notifyError = () => {
-  resolveResult?.('error')
-  resolveResult = null
-}
 
 const updateKeyInfo = async () => {
   try {
     const data = await api.getAccessKeyInfo(searchStore.data!)
     if (data.uuid) {
       keyInfo.value = data
-      notifySuccess()
+      open.value = true
       searchStore.reset()
-    } else notifyError()
-  } catch (e) {
-    notifyError()
+    }
+  } catch {
+    // При неверном ключе окно не открывается.
   }
 }
 
 watch(() => searchStore.trigger, () => {
   if (searchStore.mode === SearchMode.UUID) updateKeyInfo()
-})
-
-defineExpose({
-  open,
-  waitForResult,
 })
 
 </script>

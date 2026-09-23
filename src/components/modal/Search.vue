@@ -6,7 +6,7 @@ import {useSearchStore} from '../../stores/search'
 
 import {SearchMode} from '../../utils/types'
 
-const open = ref(false)
+const open = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ (e: 'search', value: string): void }>()
 const formRef = ref<{ validate: () => Promise<unknown> }>()
 const searchStore = useSearchStore()
@@ -27,7 +27,6 @@ watch(() => searchStore.mode, () => {
   model.searchData = ''
 })
 
-defineExpose({open})
 </script>
 
 <template>

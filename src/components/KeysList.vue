@@ -21,7 +21,6 @@ const emit = defineEmits<{
   (e: 'showModal:CreateKey'): void
   (e: 'showModal:DeleteAllKeys'): void
   (e: 'showModal:Search'): void
-  (e: 'search:Reset'): void
 }>()
 
 const userStore = useUserStore()
@@ -107,10 +106,13 @@ const getPage = (type:'all'|'user' = 'all') =>  {
 }
 const getUrl = (uuid: string) => `${jsApi.getAppBaseUrl()}operator/#uuid:${uuid}`
 const resetCurrentPage = () => pagination.value.current = 1
+const resetSearch = () => {
+  resetCurrentPage()
+  searchStore.reset()
+  getPage()
+}
 
 onMounted(() => getPage())
-
-defineExpose({getPage, resetCurrentPage})
 
 watch(() => searchStore.trigger, () => {
   if (searchStore.mode === SearchMode.Login && searchStore.data) getPage('user') 
@@ -145,7 +147,7 @@ watch(() => searchStore.trigger, () => {
         <template #message>
           <div>
             <a-typography-link class="link" type="text" @click="emit('showModal:Search')">Изменить</a-typography-link>
-            <a-typography-link class="link" v-if="searchStore.data" type="text" @click="emit('search:Reset')">Сбросить</a-typography-link>
+            <a-typography-link class="link" v-if="searchStore.data" type="text" @click="resetSearch">Сбросить</a-typography-link>
             <a-typography-text>[{{ searchStore.mode == SearchMode.Login ? "Пользователь" : "Ключ" }}: {{ searchStore.data }}]</a-typography-text>
           </div>
         </template>

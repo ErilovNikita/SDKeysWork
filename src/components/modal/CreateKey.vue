@@ -14,15 +14,13 @@ const searchStore = useSearchStore()
 const api: ConnectorService = new ConnectorService()
 const formRef = ref<{ validate: () => Promise<unknown> }>()
 const loading = ref(false)
-const open = ref(false)
+const open = defineModel<boolean>('open', { default: false })
 const dateFormat = 'DD.MM.YYYY HH:mm'
 
 const lifetimeOptions = [
   { label: 'В днях', value: 'days' },
   { label: 'Дедлайн', value: 'deadline' },
 ]
-
-defineExpose({ open })
 
 const model = reactive<ICreateKeyForm>({
   login: userStore.login,

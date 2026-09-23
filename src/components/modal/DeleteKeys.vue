@@ -14,7 +14,7 @@ const userStore = useUserStore()
 const api: ConnectorService = new ConnectorService()
 const formRef = ref<{ validate: () => Promise<unknown> }>()
 const confirmationsMeta = ref<ConfirmItem[]>([])
-const open = ref(false)
+const open = defineModel<boolean>('open', { default: false })
 
 const model = reactive<DeleteKeysForm>({
   localLogin: userStore.login,
@@ -54,8 +54,6 @@ const generateConfirmations = (count = 5) => {
   confirmationsMeta.value = meta
   model.confirmations = values
 }
-
-defineExpose({ open })
 
 watch(open, visible => { if (visible) generateConfirmations() })
 
