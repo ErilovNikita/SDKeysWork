@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import themeConfig from './themeProvider'
+import { ConfigProvider } from '@minitwiks/nsmp-vue-components'
 import { onMounted, ref } from 'vue'
 
 import {useSearchStore} from './stores/search.ts'
@@ -63,8 +63,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <a-config-provider :theme="themeConfig">
-    <template v-if="appReady">
+  <ConfigProvider>
+    <div v-if="appReady" style="background-color: white;">
       <StatesModal v-if="isDev()"/>
       <CreateKeyModal ref="createKeyModalRef"/>
       <DeleteKeysModal ref="deleteKeysModalRef"/>
@@ -89,6 +89,6 @@ onMounted(async () => {
         header="Ваших прав не достаточно"
         description="Но вы можете посмотреть как тут красиво"
       />
-    </template>
-  </a-config-provider>
+    </div>
+  </ConfigProvider>
 </template>
