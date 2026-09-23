@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from "vue"
-import { IKeyInfo } from "../../utils/types"
+import { onBeforeUnmount, ref, onMounted } from "vue"
+import { IKeyInfo, IParameters } from "../../utils/types"
 import { usePlatform } from '../../composables/usePlatform'
 
 const { isMac } = usePlatform()
 const props = defineProps<{ accessKey: IKeyInfo }>()
+const hideAccessKeys = ref<Boolean>(true)
 const showText = ref(false)
 const copied = ref(false)
 const tooltipOpen = ref(false)
@@ -25,6 +26,11 @@ const handleClick = () => {
   showText.value = true
 }
 
+onMounted( async () => {
+  const parameters:IParameters = await jsApi.contents.getParameters()
+  hideAccessKeys.value = parameters.hideAccessKeys ?? false
+})
+
 onBeforeUnmount(() => clearTimeout(resetCopiedTimer))
 </script>
 
@@ -33,7 +39,7 @@ onBeforeUnmount(() => clearTimeout(resetCopiedTimer))
     <a-tooltip v-model:open="tooltipOpen" :title="copied ? 'Скопировано!' : 'Скопировать'" class="uuid-text" placement="top">
       <span class="uuid-trigger">
         <a-skeleton-button 
-          v-if="!showText"
+          v-if="!showText && hideAccessKeys"
           :active="isMac"
           shape="round" 
           class="key-skeleton"
@@ -43,7 +49,7 @@ onBeforeUnmount(() => clearTimeout(resetCopiedTimer))
           v-else
           class="uuid-text"
           :content="accessKey.uuid"
-          @click="showText = false"
+          @click="handleClick"
         />
       </span>
     </a-tooltip>

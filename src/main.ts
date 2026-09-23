@@ -1,5 +1,5 @@
 import {createApp} from 'vue'
-import { createInitVariableFromEnv, initializeJsApi, initVariableEnvMapping } from '@minitwiks/js-api'
+import { createInitVariableFromEnv, initializeJsApi, initVariableEnvMapping, PartialJsApi } from '@minitwiks/js-api'
 import {createPinia} from 'pinia'
 import App from './App.vue'
 import Antd from 'ant-design-vue'
@@ -22,7 +22,21 @@ const params = createInitVariableFromEnv(import.meta.env, mapping)
 
 hljs.registerLanguage('json', json)
 
-initializeJsApi({}, params).then((JsApi: any) => {
+const mock: PartialJsApi = {
+    contents: {
+        getParameters: async () => {
+            const raw = import.meta.env.VITE_MOCK_PARAMETERS_HIDE_ACCESSKEY;
+            const hideAccessKeys =
+                typeof raw === 'string'
+                ? ['1', 'true', 'yes', 'on'].includes(raw.toLowerCase())
+                : false; // если переменной нет – считаем false
+
+            return { hideAccessKeys };
+        },
+    }
+}
+
+initializeJsApi(mock, params).then((JsApi: any) => {
     const app = createApp(App)
     const pinia = createPinia()
 

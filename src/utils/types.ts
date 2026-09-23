@@ -58,6 +58,10 @@ interface IEditKeyForm {
   description: string,
 }
 
+interface IParameters {
+    hideAccessKeys?: boolean
+}
 
-export type {IUser, IInitialData, IPages, IKeysList, IKeyInfo, ICreateKeyForm, IEditKeyForm}
+
+export type {IUser, IInitialData, IPages, IKeysList, IKeyInfo, ICreateKeyForm, IEditKeyForm, IParameters}
 export {SearchMode}
