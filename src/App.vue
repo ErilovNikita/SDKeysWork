@@ -78,7 +78,10 @@ onMounted(async () => {
         @search:Reset="handleResetSearch"
       />
 
-      <KeysList ref="keysListRef" />
+      <KeysList 
+        v-if="userStore.canUse"
+        ref="keysListRef"
+      />
 
       <MessageTemplate 
         v-if="!userStore.canUse"
