@@ -107,7 +107,7 @@ const getPage = (type:'all'|'user' = 'all') =>  {
       })
     } else searchStore.reset()
   }).catch((e:any) => {
-    notifyError('Ошибка при загрузке списка', e)
+    notifyError('Ошибка при загрузке списка', e ?? e.message)
     searchStore.reset()
   }).finally(() => loading.value = false)
 }
