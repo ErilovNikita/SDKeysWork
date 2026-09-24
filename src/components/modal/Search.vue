@@ -29,20 +29,23 @@ const submit = async (): Promise<void> => {
 }
 
 watch(() => searchStore.mode, () => model.searchData = '')
-watch(() => model.mode, () => model.searchData = '')
+watch(() => model.mode, () => {
+  model.searchData = ''
+  searchStore.mode = model.mode
+})
 
 </script>
 
 <template>
-  <Modal title="Поиск" v-model:open="open">
+  <Modal title="Фильтрация" v-model:open="open">
     <template #form>
       <Form ref="formRef" :model="model">
         <FormSelect
           name="mode"
-          label="Тип поиска"
+          label="Тип"
           :options="[
-            { label: 'Логину', value: SearchMode.Login },
-            { label: 'Ключу', value: SearchMode.UUID },
+            { label: 'Логин', value: SearchMode.Login },
+            { label: 'Ключ', value: SearchMode.UUID },
           ]"
           view="radio-button"
           radio-button-style="solid"
@@ -50,7 +53,7 @@ watch(() => model.mode, () => model.searchData = '')
 
         <FormInput
           name="searchData"
-          :label="searchStore.mode === SearchMode.Login ? 'Логин' : 'Значение ключа'"
+          :label="model.mode === SearchMode.Login ? 'Логин' : 'Значение ключа'"
           :rules="[{ required: true, message: 'Обязательно к заполнению' }]"
         />
       </Form>
