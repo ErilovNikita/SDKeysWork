@@ -8,6 +8,7 @@ export enum Platform {
 /** Возможности интерфейса, которые можно отключить для выбранной платформы. */
 export enum PlatformFeature {
   AntAnimations = 'ant-animations',
+  ModalBackdropBlur = 'modal-backdrop-blur',
 }
 
 /** Список отключённых возможностей для каждой платформы. */

@@ -11,6 +11,11 @@ const ANT_ANIMATIONS_STYLES = `
   transition: none !important;
   scroll-behavior: auto !important;
 }
+
+[${DISABLED_FEATURES_ATTRIBUTE}~="${PlatformFeature.ModalBackdropBlur}"] .ant-modal-mask {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
 `
 
 /** Возвращает возможности, отключённые правилами для указанной платформы. */
@@ -22,7 +27,8 @@ export const getDisabledPlatformFeatures = (
 /**
  * Применяет отключённые возможности к документу.
  *
- * Для `AntAnimations` отключает CSS-анимации и переходы всех Ant-компонентов.
+ * Для `AntAnimations` отключает CSS-анимации и переходы всех Ant-компонентов,
+ * для `ModalBackdropBlur` — размытие подложки модальных окон.
  * Повторный вызов заменяет ранее применённый список возможностей.
  */
 export const applyDisabledPlatformFeatures = (
@@ -39,10 +45,7 @@ export const applyDisabledPlatformFeatures = (
 
   root.setAttribute(DISABLED_FEATURES_ATTRIBUTE, features.join(' '))
 
-  if (
-    features.includes(PlatformFeature.AntAnimations)
-    && !documentObject.getElementById(ANT_ANIMATIONS_STYLE_ID)
-  ) {
+  if (features.length > 0 && !documentObject.getElementById(ANT_ANIMATIONS_STYLE_ID)) {
     const style = documentObject.createElement('style')
     style.id = ANT_ANIMATIONS_STYLE_ID
     style.textContent = ANT_ANIMATIONS_STYLES

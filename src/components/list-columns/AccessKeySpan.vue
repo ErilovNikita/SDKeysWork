@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, onMounted } from "vue"
 import { IKeyInfo, IParameters } from "../../utils/types"
-import { usePlatform } from '../../composables/usePlatform'
+import { usePlatform } from '../../utils/platform'
 
 const { isMac } = usePlatform()
 const props = defineProps<{ accessKey: IKeyInfo }>()

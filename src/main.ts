@@ -8,10 +8,21 @@ import 'iframe-resizer/js/iframeResizer.contentWindow'
 import hljs from 'highlight.js/lib/core'
 import json from 'highlight.js/lib/languages/json'
 import hljsVuePlugin from "@highlightjs/vue-plugin"
+import { applyPlatformFeatureRules, detectPlatform, Platform, PlatformFeature } from './utils/platform'
 
 import 'highlight.js/styles/lightfair.css'
 import '@minitwiks/nsmp-vue-components/style.css'
 import './assets/styles/index.css'
+
+applyPlatformFeatureRules(
+  detectPlatform(globalThis.navigator?.userAgent ?? ''),
+  {
+    [Platform.Windows]: [
+      PlatformFeature.AntAnimations,
+      PlatformFeature.ModalBackdropBlur,
+    ],
+  },
+)
 
 const mapping = {
     ...initVariableEnvMapping,
