@@ -30,8 +30,10 @@ const remove = async (): Promise<void> => {
 <template>
   <Modal v-model:open="open" :title="modalTitle" :body-style="{ textAlign: 'left' }">
     <template #form>
-      <p>Вы действительно хотите удалить ключ "<code>{{ props.accessKey.uuid }}</code>"?</p>
-      <p>Данные будут потеряны навсегда.</p>
+      <p class="delete-key-message">
+        <span>Вы действительно хотите удалить ключ </span><code>{{ props.accessKey.uuid }}</code><span>?</span>
+      </p>
+      <p>Данные ключа будут потеряны навсегда.</p>
     </template>
     
     <template #footer>
@@ -49,3 +51,17 @@ const remove = async (): Promise<void> => {
     v-if="props.accessKey.uuid != usingEnvAccessKey"
   />
 </template>
+
+<style scoped>
+.delete-key-message {
+  white-space: normal;
+}
+
+.delete-key-message code {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  vertical-align: text-bottom;
+  white-space: nowrap;
+}
+</style>
