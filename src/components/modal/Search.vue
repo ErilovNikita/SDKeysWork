@@ -2,15 +2,20 @@
 import { reactive, ref, watch } from 'vue'
 
 import { Button, Form, FormInput, FormSelect, Modal } from '@minitwiks/nsmp-vue-components'
-import {useSearchStore} from '../../stores/search'
+import { useSearchStore } from '../../stores/search'
+import { useUserStore } from '../../stores/user.ts'
+import { SearchMode } from '../../utils/types'
 
-import {SearchMode} from '../../utils/types'
+const searchStore = useSearchStore()
+const userStore = useUserStore()
 
 const open = defineModel<boolean>('open', { default: false })
 const emit = defineEmits<{ (e: 'search', value: string): void }>()
 const formRef = ref<{ validate: () => Promise<unknown> }>()
-const searchStore = useSearchStore()
-const model = reactive({ searchData: '' })
+const model = reactive({ 
+  searchData: userStore.login,
+  mode: SearchMode.Login
+})
 
 const submit = async (): Promise<void> => {
   try {
@@ -23,9 +28,8 @@ const submit = async (): Promise<void> => {
   }
 }
 
-watch(() => searchStore.mode, () => {
-  model.searchData = ''
-})
+watch(() => searchStore.mode, () => model.searchData = '')
+watch(() => model.mode, () => model.searchData = '')
 
 </script>
 
@@ -34,7 +38,7 @@ watch(() => searchStore.mode, () => {
     <template #form>
       <Form ref="formRef" :model="model">
         <FormSelect
-          v-model:value="searchStore.mode"
+          name="mode"
           label="Тип поиска"
           :options="[
             { label: 'Логину', value: SearchMode.Login },
@@ -45,7 +49,6 @@ watch(() => searchStore.mode, () => {
         />
 
         <FormInput
-          v-model:value="model.searchData"
           name="searchData"
           :label="searchStore.mode === SearchMode.Login ? 'Логин' : 'Значение ключа'"
           :rules="[{ required: true, message: 'Обязательно к заполнению' }]"
