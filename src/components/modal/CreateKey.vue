@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, h, reactive, ref } from 'vue'
+import { computed, h, reactive, ref, watch } from 'vue'
+import type { Dayjs } from 'dayjs'
 import { Button, Form, FormDate, FormInput, FormNumber, FormSelect, Modal } from '@minitwiks/nsmp-vue-components'
 import { notifyError, notifySuccess } from '../../utils/notification'
 
@@ -19,7 +20,7 @@ const dateFormat = 'DD.MM.YYYY HH:mm'
 
 const lifetimeOptions = [
   { label: 'В днях', value: 'days' },
-  { label: 'Дедлайн', value: 'deadline' },
+  { label: 'Точная дата', value: 'deadline' },
 ]
 
 const model = reactive<ICreateKeyForm>({
@@ -35,6 +36,36 @@ const keyType = computed<number>({
   get: () => Number(model.onetime),
   set: value => model.onetime = Boolean(value),
 })
+
+const positiveDaysRule = {
+  validator: async (_: unknown, value: number | null) => {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+      throw new Error('Срок жизни должен быть больше нуля')
+    }
+  }
+}
+
+const disablePastDates = (date: Dayjs) =>
+  date.isBefore(new Date(), 'day')
+
+watch(() => model.keyDays, value => {
+  if (typeof value === 'number' && value <= 0) model.keyDays = 1
+}, { flush: 'sync' })
+
+const deadlineRule = {
+  validator: async (_: unknown, value: string | null) => {
+    if (!value) throw new Error('Укажите дедлайн')
+
+    const [date, time] = value.split(' ')
+    const [day, month, year] = date.split('.').map(Number)
+    const [hours, minutes] = time?.split(':').map(Number) ?? []
+    const deadline = new Date(year, month - 1, day, hours, minutes)
+
+    if (Number.isNaN(deadline.getTime()) || deadline < new Date()) {
+      throw new Error('Конец действия не может быть раньше текущего времени')
+    }
+  }
+}
 
 const createNewToken = async (): Promise<void> => {
   if (model.deadlineMode === 'days') model.deadline = null
@@ -90,7 +121,7 @@ const submit = async (): Promise<void> => {
           v-if="userStore.superUser"
           name="login"
           label="Логин пользователя"
-          :rules="[{ required: true, message: 'Надо' }]"
+          :rules="[{ required: true, message: 'Обязательное поле' }]"
         />
 
         <FormSelect
@@ -104,22 +135,25 @@ const submit = async (): Promise<void> => {
         <FormDate
           v-if="model.deadlineMode === 'deadline'"
           name="deadline"
-          label="Дедлайн"
+          label="Конец действия"
           type="datetime"
-          :date-picker-props="{ format: dateFormat, valueFormat: dateFormat }"
+          :date-picker-props="{ format: dateFormat, valueFormat: dateFormat, disabledDate: disablePastDates }"
+          :rules="[deadlineRule]"
         />
 
         <FormNumber
           v-if="model.deadlineMode === 'days'"
           name="keyDays"
           label="Срок жизни в днях"
+          :min="1"
+          :rules="[positiveDaysRule]"
         />
 
         <FormInput
           name="description"
           label="Описание"
           description="Для чего используется ключ"
-          :rules="[{ required: true, message: 'Надо' }]"
+          :rules="[{ required: true, message: 'Обязательное поле' }]"
         />
 
         <FormSelect
