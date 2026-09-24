@@ -103,7 +103,13 @@ const getPage = (type:'all'|'user' = 'all') =>  {
     elements.value.push(...data.data)    
     if (type != 'user') searchStore.reset()
   }).catch((e:any) => {
-    notifyError('Ошибка при загрузке списка', e ?? e.message)
+    let responseText = e.responseText
+    if (typeof responseText === 'string') {
+      try {
+        responseText = JSON.parse(responseText)
+      } catch {}
+    }
+    notifyError('Ошибка при загрузке', responseText?.message ?? responseText ?? e.message ?? e)
     searchStore.reset()
   }).finally(() => loading.value = false)
 }

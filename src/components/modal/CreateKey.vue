@@ -55,9 +55,16 @@ const createNewToken = async (): Promise<void> => {
       ),
     })
     searchStore.setSearchData(searchStore.data!)
-  } catch (error) {
-    notifyError('Произошла ошибка', error)
-    throw error
+  } catch (e:any) {
+    console.log(e)
+    let responseText = e.responseText
+    if (typeof responseText === 'string') {
+      try {
+        responseText = JSON.parse(responseText)
+      } catch {}
+    }
+    notifyError('Ошибка при создании ключа', responseText?.cause?.message ?? responseText?.message ?? responseText ?? e.message ?? e)
+    throw e
   } finally {
     loading.value = false
   }

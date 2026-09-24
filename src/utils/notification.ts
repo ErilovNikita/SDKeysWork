@@ -17,6 +17,7 @@ export const notifyError = (title: string, error: unknown, options: SuccessOptio
     title,
     description: error instanceof Error ? error.message : String(error),
     type: 'error',
+    expandedByDefault: true,
     ...options
   })
 
