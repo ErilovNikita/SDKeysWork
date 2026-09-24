@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from "vue"
 import type { TablePaginationConfig } from 'ant-design-vue'
 import { Button, Table, Alert, type TableColumn, type TableView } from '@minitwiks/nsmp-vue-components'
-import { notifyError, notifySuccess } from '../utils/notification'
+import { notifyError } from '../utils/notification'
 
 import AccessKeySpan from "./list-columns/AccessKeySpan.vue"
 import AccessKeySwitch from "./list-columns/AccessKeySwitch.vue"
@@ -101,11 +101,7 @@ const getPage = (type:'all'|'user' = 'all') =>  {
     pagination.value.total = data.pages.count
     elements.value.length = 0
     elements.value.push(...data.data)    
-    if (type == 'user') {
-      notifySuccess('Запрос выполнен', {
-        description: elements.value.length ? `Получено ключей ${elements.value.length} шт.` : `Ключей не найдено`,
-      })
-    } else searchStore.reset()
+    if (type != 'user') searchStore.reset()
   }).catch((e:any) => {
     notifyError('Ошибка при загрузке списка', e ?? e.message)
     searchStore.reset()

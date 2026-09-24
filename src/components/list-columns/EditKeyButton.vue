@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, reactive, ref, watch } from "vue"
 import { Button, Form, FormDate, FormInput, Modal } from '@minitwiks/nsmp-vue-components'
-import { notifyError, notifySuccess } from '../../utils/notification'
+import { notifyError } from '../../utils/notification'
 import { EditIcon } from 'nsmp-icons'
 
 import type { IKeyInfo, IEditKeyForm } from "../../utils/types"
@@ -41,7 +41,6 @@ const submit = async (): Promise<void> => {
 
   try {
     await api.editAccessKey(props.accessKey.uuid, model.description, model.deadline)
-    notifySuccess('Ключ успешно изменен')
     searchStore.setSearchData(searchStore.data!)
     open.value = false
   } catch (error) {

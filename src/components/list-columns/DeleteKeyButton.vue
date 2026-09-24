@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Modal } from '@minitwiks/nsmp-vue-components'
-import { notifyError, notifySuccess } from '../../utils/notification'
+import { notifyError } from '../../utils/notification'
 import { h, ref } from 'vue'
 import { DeleteIcon } from 'nsmp-icons'
 
@@ -18,7 +18,6 @@ const modalTitle = h('span', { style: 'display: block; text-align: left' }, 'В�
 const remove = async (): Promise<void> => {
   try {
     await api.deleteKey(props.accessKey.uuid)
-    notifySuccess('Ключ успешно удален')
     searchStore.setSearchData(searchStore.data!)
     open.value = false
   } catch (error) {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FormSwitch } from '@minitwiks/nsmp-vue-components'
-import { notifyError, notifySuccess } from '../../utils/notification'
+import { notifyError } from '../../utils/notification'
 
 import type { IKeyInfo } from "../../utils/types"
 import ConnectorService from "../../utils/connector"
@@ -25,8 +25,7 @@ const errorSwitch = (error: unknown): void => {
   notifyError('Произошла ошибка', error)
 }
 
-const successSwitch = (description: string): void => {
-  notifySuccess('Ключ успешно изменен', {description})
+const successSwitch = (): void => {
   props.accessKey.active = !props.accessKey.active
 }
 
@@ -34,9 +33,8 @@ const toggle = ():void => {
   const request = props.accessKey.active
     ? api.disableKey(props.accessKey.uuid)
     : api.enableKey(props.accessKey.uuid)
-  const message = props.accessKey.active ? 'Ключ доступа отключен' : 'Ключ доступа активирован'
 
-  request.then(() => successSwitch(message)).catch(errorSwitch)
+  request.then(() => successSwitch()).catch(errorSwitch)
 }
 
 </script>

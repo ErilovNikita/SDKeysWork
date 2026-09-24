@@ -4,7 +4,7 @@ type NotificationOptions = Omit<OpenNotificationOptions, 'placement' | 'duration
 type SuccessOptions = Omit<NotificationOptions, 'title' | 'type'>
 
 export const notify = (options: NotificationOptions) => openNotification({
-  placement: 'bottomRight',
+  placement: 'topRight',
   duration: 5,
   ...options,
 })

@@ -3,7 +3,6 @@ import { compareVersions, getLastVersion } from '../utils/services'
 import { notifyError, notifyWarning } from '../utils/notification'
 
 const notificationOptions = {
-    placement: 'topRight',
     closable: false,
     expandedByDefault: true,
 }
