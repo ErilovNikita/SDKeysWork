@@ -27,24 +27,6 @@ import ru.naumen.core.server.script.api.accesskeys.AccessKey
 import static ru.kazantsev.nsd.sdk.global_variables.ApiPlaceholder.*;
 import static ru.kazantsev.nsd.sdk.global_variables.ControllerVariablesPlaceholder.*;
 
-/**
- * Параметры, от низ зависит как будет работать модуль
- */
-abstract class Parameters {
-    /**
-     * Разрешить всем пользоваться модулем на хостах,
-     * которые соответствуют перечисленным хостам в параметре TEST_HOSTS.
-     * При этом пользователи смогут работать только со своими ключами.
-     */
-    static final Boolean ALLOW_TO_ALL_IN_TEST_ENV = true
-    /**
-     * Перечень логинов, владельцы котрых будет считаться суперпользователеями
-     */
-    static final List<String> SUPERUSER_LOGINS = []
-    /** Продакшн хост */
-    static final List<String> TEST_HOSTS = []
-}
-
 abstract class Dto {
     static class KeysList {
         static class Pages {
@@ -72,35 +54,36 @@ abstract class Utilities {
 
     static private ApiHolder apiHolder = new ApiHolder()
 
-    /**
-     * Получить число ключей пользователя
-     * @param username логин пользователя
-     * @return число
-     */
-    static Integer getUsersKeysCount(String username) {
-        String q = "SELECT COUNT(*) FROM ${AccessKey.class.getName()} WHERE username = :login"
-        return apiHolder.api.db.query(q).set('login', username).list().last() as Integer
+    static Class findConfigClass() {
+        try {
+            return Utilities.class.classLoader.loadClass('ru.sdkeyswork.keysWork.Config')
+        } catch (ClassNotFoundException ignored) {
+            return null
+        }
     }
 
-    /**
-     * Получить число всех ключей
-     * @return число
-     */
-    static Integer getAllKeysCount() {
-        String q = "SELECT COUNT(*) FROM ${AccessKey.class.getName()} WHERE username != 'naumen'"
-        return apiHolder.api.db.query(q).list().last() as Integer
+    static Object configValue(String fieldName) {
+        Class configClass = findConfigClass()
+        if (configClass == null) return null
+
+        return configClass.getField(fieldName).get(null)
     }
 
+    static boolean configBoolean(String fieldName, boolean defaultValue = false) {
+        Object value = configValue(fieldName)
+        return value instanceof Boolean ? value : defaultValue
+    }
 
-    /**
-     * Получить базовые настройки
-     * @return
-     */
-    static Preferences getPrefs() {
-        Preferences prefs = new Preferences().setDatePattern('dd.MM.yyyy HH:mm')
-        //Boolean test = isTest()
-        //if (!Parameters.ALLOW_TO_ALL_IN_TEST_ENV || !test) prefs.assertSuperuser(true)
-        return prefs
+    static List<String> configList(String fieldName) {
+        try {
+            Class configClass = findConfigClass()
+            if (configClass == null) return []
+
+            Object value = configClass.getField(fieldName).get(null)
+            return value instanceof Collection ? value.collect { it.toString() } : []
+        } catch (Exception ignored) {
+            return []
+        }
     }
 
     /**
@@ -109,8 +92,46 @@ abstract class Utilities {
      * @return да или нет
      */
     static Boolean isTest() {
-        String baseUrl = apiHolder.api.web.getBaseUrl()
-        return Parameters.TEST_HOSTS.any { baseUrl.contains(it) }
+        String host = new URI(apiHolder.api.web.getBaseUrl()).host
+        configList('TEST_HOSTS').any {
+            it.equalsIgnoreCase(host)
+        }
+    }
+
+    /**
+     * Проверить что прилодение доступно всем на тсете.
+     * @return да или нет
+     */
+    static Boolean allowAllInTest() {
+        configBoolean('ALLOW_TO_ALL_IN_TEST_ENV', false)
+    }
+
+    /**
+     * Получить число ключей пользователя
+     * @param username логин пользователя
+     * @return число
+     */
+    static Integer getUsersKeysCount(String username) {
+        String q = "SELECT COUNT(*) FROM ${AccessKey.class.getName()} WHERE username = :login"
+        apiHolder.api.db.query(q).set('login', username).list().last() as Integer
+    }
+
+    /**
+     * Получить число всех ключей
+     * @return число
+     */
+    static Integer getAllKeysCount() {
+        String q = "SELECT COUNT(*) FROM ${AccessKey.class.getName()} WHERE username != 'naumen'"
+        apiHolder.api.db.query(q).list().last() as Integer
+    }
+
+
+    /**
+     * Получить базовые настройки
+     * @return
+     */
+    static Preferences getPrefs() {
+        new Preferences().setDatePattern('dd.MM.yyyy HH:mm')
     }
 
     /**
@@ -151,7 +172,7 @@ abstract class PermissionsService {
      */
     static Boolean canUserUseApplication(ISDtObject user) {
         if (isSuperuser(user)) return true
-        return Parameters.ALLOW_TO_ALL_IN_TEST_ENV && Utilities.isTest()
+        Utilities.allowAllInTest() && Utilities.isTest()
     }
 
     /**
@@ -210,7 +231,7 @@ abstract class PermissionsService {
     static Boolean isUsersKey(ISDtObject user, Map<String, Object> keyData) {
         if (isSuperuser(user)) return true
         String employeeUuid = keyData?.get('employeeUuid')
-        return user.getUUID() == employeeUuid
+        user.getUUID() == employeeUuid
     }
 
     /**
@@ -219,7 +240,8 @@ abstract class PermissionsService {
      * @return да или нет
      */
     static Boolean isSuperuser(ISDtObject user) {
-        return user == null || (String) user.login in Parameters.SUPERUSER_LOGINS
+        List<String> superusers = Utilities.configList('SUPERUSER_LOGINS')
+        user == null || (user.login as String) in superusers
     }
 
     /**
