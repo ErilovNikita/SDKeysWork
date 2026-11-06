@@ -48,7 +48,7 @@ export interface DispatchOptions {
   permutation?: string
   /** Базовый URL NSMP. По умолчанию используется origin текущей страницы. */
   baseUrl?: string
-  /** Путь к GWT-модулю. По умолчанию `/sd/admin/`. */
+  /** Путь к GWT-модулю. По умолчанию `/sd/operator/`. */
   modulePath?: string
   /** CSRF-токен. Если не указан, ищется в текущем или родительском документе. */
   csrfToken?: string

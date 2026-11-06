@@ -189,6 +189,7 @@ export const decodeAllPersonalSettings = (body: string): AllPersonalSettings => 
   let themeCode = themeTitleIndex > 0 ? strings[themeTitleIndex - 1] : null
 
   if (themeCode == 'style.properties') themeCode = strings[themeTitleIndex - 4]
+  if (themeCode?.indexOf('/ru/naumen/core') !== -1) themeCode = strings[themeTitleIndex - 2]
 
   const themes: ThemeClient[] = themeCode
     ? [{
