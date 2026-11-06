@@ -13,7 +13,7 @@
   "dependencies": {
     "@highlightjs/vue-plugin": "^2.1.0",
     "@minitwiks/js-api": "^2.1.1",
-    "@minitwiks/nsmp-vue-components": "^1.1.5",
+    "@minitwiks/nsmp-vue-components": "^1.1.10",
     "ant-design-vue": "^4.2.6",
     "iframe-resizer": "5.5.8",
     "nsmp-icons": "^1.2.1",
