@@ -76,7 +76,7 @@ export class Dispatch {
     if (!action.trim()) throw new TypeError('Имя Dispatch action не должно быть пустым')
 
     const moduleBase = new URL(
-      this.options.modulePath ?? '/sd/admin/',
+      this.options.modulePath ?? '/sd/operator/',
       this.options.baseUrl ?? window.location.origin,
     ).href
     const build = await this.getBuildInfo(moduleBase, action, actionSignature)
